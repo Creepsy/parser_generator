@@ -62,7 +62,7 @@ A parser generator for generating LR(1) parsers in C++. This parser generator is
       ```
     + Appending to the members of a parameter:
   
-      The syntax for adding more members to a vector looks like this:
+      The syntax for adding more members to a list looks like this:
       ```
       list(name:Token, members:vec<value>);
       l:list <COMMA> v:value -> append l(?, [v]);
@@ -76,7 +76,7 @@ A parser generator for generating LR(1) parsers in C++. This parser generator is
       f:number <ADD> s:number -> addition(f, s);
       ```
   
-    A rule has to return a user defined type, so it is not possible to return vectors or tokens.
+    A rule has to return a user defined type, so it is not possible to return lists or tokens.
 
 ## Using the parser generator to create a parser
 1. ### Creating a parser
