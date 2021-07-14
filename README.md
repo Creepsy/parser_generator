@@ -35,7 +35,7 @@ A parser generator for generating LR(1) parsers in C++. This parser generator is
     |User-defined Types| list, expr, ...| Another possibility is to use types defined by the parser rules(see 1. Defining types). It is worth mentioning that a specific type can also have itself as member (an addition could have a member with the type addition).|
     |List of types| vec\<Token\>, vec\<list\> | Furthermore, it is also possible to have a list of a specific type as a member. Please note that only one-dimensional lists are supported.
 
-3. ### Defining rules
+### 3.  Defining rules
     The definition of a rule consists of the objects a rule captures and the result of the rule, seperated by a "->". Every rule must be followed by a semicolon:
     ```
     (rule_captures) -> (rule_result);
