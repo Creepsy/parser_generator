@@ -2,7 +2,7 @@
 A parser generator for generating LR(1) parsers in C++. This parser generator is meant to be used together with [this](https://github.com/Creepsy/lexer_generator) lexer generator.
 
 ## Creating rules for the generator
-1. ### Defining types
+### 1.  Defining types
     Defining a type is pretty simple. You start with the name of the type, followed by the members in parenthesis. Every type definition must be followed by a semicolon.
     ```
     addition(first_member:Token, second_member:Token);
@@ -22,11 +22,11 @@ A parser generator for generating LR(1) parsers in C++. This parser generator is
     ```
     Defined types are not allowed to be used as a subtypes, so the following type definitions would throw an error:
     ```
-    number : value(v : Token);
-    int : number(v : Token);
+    number:value(v : Token);
+    int:number(v : Token);
     ```
 
-2. ### Possible member types
+### 2.  Possible member types
     There are multiple possibilities what type a member can have:
 
     |Type|Example  |Explanation|
@@ -79,7 +79,7 @@ A parser generator for generating LR(1) parsers in C++. This parser generator is
     A rule has to return a user defined type, so it is not possible to return lists or tokens.
 
 ## Using the parser generator to create a parser
-1. ### Creating a parser
+### 1. Creating a parser
    **TODO**
-2. ### Format of the generated parser
+### 2. Format of the generated parser
    **TODO**
