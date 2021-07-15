@@ -78,6 +78,28 @@ A parser generator for generating LR(1) parsers in C++. This parser generator is
   
     A rule has to return a user defined type, so it is not possible to return lists or tokens.
 
+    #### Grouping rules
+    There is also the possiblility to group multiple rules together by putting them in a namespace. To put a rule in a namespace, simply put a '#' followed by the namespace name before the rule defintion like this:
+    ```
+    #enumeration l:list <COMMA> v:value -> append l([v]);
+    ```
+    Grouped rules will only be used if you explicitly tell the parser generator to use them. This is done by adding the namespace name and the '#' behind the type of an capture object. It is also possible to use multiple namespaces for the same type:
+    ```
+    #namespace_0 v:value -> list([v]);
+    #namespace_1 l:list <COMMA> v:value -> append l([v]);
+
+    l:list#namespace_0 -> l;
+    l:list#namespace_0#namespace_1 <EOF> -> l;
+    ```
+3. ### Comments
+    A "//"
+    will comment out the rest of the line:
+    ```
+    //A comment
+    f:number <ADD> s:number -> addition(f, s); //Another comment!
+    ```
+
+
 ## Using the parser generator to create a parser
 1. ### Creating a parser
    **TODO**
