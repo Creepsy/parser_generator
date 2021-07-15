@@ -1,0 +1,3 @@
+[submodule "lexer_generator"]
+	path = lexer_generator
+	url = https://github.com/Creepsy/lexer_generator.git

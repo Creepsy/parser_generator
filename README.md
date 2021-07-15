@@ -18,12 +18,12 @@ A parser generator for generating LR(1) parsers in C++. This parser generator is
     ```
     int:value(v:Token);
     float:value(v:Token);
-    list:value, iteratable(v:vec<Token>);
+    list:value, iterable(v:vec[Token]);
     ```
     Defined types are not allowed to be used as a subtypes, so the following type definitions would throw an error:
     ```
-    number:value(v : Token);
-    int:number(v : Token);
+    number:value(v:Token);
+    int:number(v:Token);
     ```
 
 2. ### Possible member types
@@ -33,7 +33,7 @@ A parser generator for generating LR(1) parsers in C++. This parser generator is
     |:--:|:-------:|:---------:|
     |Token |        -| The type "Token" is used for storing the lexer tokens.        |
     |User-defined Types| list, expr, ...| Another possibility is to use types defined by the parser rules(see 1. Defining types). It is worth mentioning that a specific type can also have itself as member (an addition could have a member with the type addition).|
-    |List of types| vec\<Token\>, vec\<list\> | Furthermore, it is also possible to have a list of a specific type as a member. Please note that only one-dimensional lists are supported.
+    |List of types| vec\[Token\], vec\[list\] | Furthermore, it is also possible to have a list of a specific type as a member. Please note that only one-dimensional lists are supported.
 
 3. ### Defining rules
     The definition of a rule consists of the objects a rule captures and the result of the rule, seperated by a "->". Every rule must be followed by a semicolon:
@@ -64,7 +64,7 @@ A parser generator for generating LR(1) parsers in C++. This parser generator is
   
       The syntax for adding more members to a list looks like this:
       ```
-      list(name:Token, members:vec<value>);
+      list(name:Token, members:vec[value]);
       l:list <COMMA> v:value -> append l(?, [v]);
       ```
       The keyword "append" expects the identifer of the object you want to modify. After that, you have to specify all changes to the individual members of the type. Members which you can't or doesn't want to append to have to be replaced with the placeholder '?'. You always have to put the objects you want to add to a list in square brackets. 
@@ -91,7 +91,7 @@ A parser generator for generating LR(1) parsers in C++. This parser generator is
     l:list#namespace_0 -> l;
     l:list#namespace_0#namespace_1 <EOF> -> l;
     ```
-3. ### Comments
+4. ### Comments
     A "//"
     will comment out the rest of the line:
     ```
