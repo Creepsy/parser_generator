@@ -20,6 +20,7 @@ const std::vector<std::string> TOKEN_TYPE_TO_STR{{
     "NONE",
     "ASSIGN",
     "SEPERATOR",
+    "DEFINE_TYPE",
     "APPEND",
     "VECTOR",
     "TOKEN_TYPE",
@@ -33,9 +34,9 @@ int main() {
 
     std::stringstream input{
         "//Types\n"
-        "list:value(members:vec[value]); // A list type\n"
-        "int:value, numeric(num:Token);\n"
-        "addition:value, numeric(first:numeric, operator:Token, second:numeric);\n"
+        "def list:value(members:vec[value]); // A list type\n"
+        "def int:value, numeric(num:Token);\n"
+        "def addition:value, numeric(first:numeric, operator:Token, second:numeric);\n"
         "\n"
         "//Rules\n"
         "*l:list <EOF> -> l;\n"

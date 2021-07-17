@@ -3,9 +3,9 @@ A parser generator for generating LR(1) parsers in C++. This parser generator is
 
 ## Creating rules for the generator
 1. ### Defining types
-    Defining a type is pretty simple. You start with the name of the type, followed by the members in parenthesis. Every type definition must be followed by a semicolon.
+    Defining a type is pretty simple. Every type definition starts with the "def" keyword. After that comes the name of the type, followed by the members in parenthesis. Every type definition must be followed by a semicolon.
     ```
-    addition(first_member:Token, second_member:Token);
+    def addition(first_member:Token, second_member:Token);
     ```
     Here "addition" would be the name of the type. This type would have 2 members with the names "first_member" and "second_member".
 
@@ -16,14 +16,14 @@ A parser generator for generating LR(1) parsers in C++. This parser generator is
     
     Optionally, you can also group multiple types by adding subtypes to them. This is done by adding a colon after the type name, followed by the subtypes. Multiple subtypes get seperated by a comma. 
     ```
-    int:value(v:Token);
-    float:value(v:Token);
-    list:value, iterable(v:vec[Token]);
+    def int:value(v:Token);
+    def float:value(v:Token);
+    def list:value, iterable(v:vec[Token]);
     ```
     Defined types are not allowed to be used as a subtypes, so the following type definitions would throw an error:
     ```
-    number:value(v:Token);
-    int:number(v:Token);
+    def number:value(v:Token);
+    def int:number(v:Token);
     ```
 
 2. ### Possible member types
@@ -64,7 +64,7 @@ A parser generator for generating LR(1) parsers in C++. This parser generator is
   
       The syntax for adding more members to a list looks like this:
       ```
-      list(name:Token, members:vec[value]);
+      def list(name:Token, members:vec[value]);
       l:list <COMMA> v:value -> append l(?, [v]);
       ```
       The keyword "append" expects the identifer of the object you want to modify. After that, you have to specify all changes to the individual members of the type. Members which you can't or doesn't want to append to have to be replaced with the placeholder '?'. You always have to put the objects you want to add to a list in square brackets. 
@@ -72,7 +72,7 @@ A parser generator for generating LR(1) parsers in C++. This parser generator is
   
       To create a new object, you simply have to call its constructor(The one you specified the type with):
       ```
-      addition(first:number, second:number);
+      def addition(first:number, second:number);
       f:number <ADD> s:number -> addition(f, s);
       ```
   
