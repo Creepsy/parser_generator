@@ -44,8 +44,8 @@ int main() {
         "n:<INT> -> int(n);\n"
         "f:numeric op:<ADD> s:int -> addition(f, op, s);\n"
         "#enumeration v:value -> list([v]);\n"
-        "#enumeration l:list#enumeration <SEP> v:value -> append l([v]);\n"
-        "test:none_append -> append test(?, []);"
+        "#enumeration l:list#enumeration <SEP> v:value -> l append ([v]);\n"
+        "test:none_append -> test append (?, []);"
     };
 
     rule_lexer lex{input};
