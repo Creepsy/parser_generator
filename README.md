@@ -52,7 +52,7 @@ A parser generator for generating LR(1) parsers in C++. This parser generator is
     a_token:<ADD> another_one:<SUB> -> (rule_result).
     ```
     #### Defining the result of a rule
-    There are three options for defining the rule result:
+    There are two options for defining the rule result:
     + Return an existing parameter: 
      
       To return an existing parameter, you simple have to put the identifier of the parameter behind the "->":
@@ -60,14 +60,6 @@ A parser generator for generating LR(1) parsers in C++. This parser generator is
       t:number -> t;
       to_return:list -> to_return;
       ```
-    + Appending to the members of a parameter:
-  
-      The syntax for adding more members to a list looks like this:
-      ```
-      def list(name:Token, members:vec[value]);
-      l:list <COMMA> v:value -> append l(?, [v]);
-      ```
-      The keyword "append" expects the identifer of the object you want to modify. After that, you have to specify all changes to the individual members of the type. Members which you can't or doesn't want to append to have to be replaced with the placeholder '?'. You always have to put the objects you want to add to a list in square brackets. 
     + Creating a new object:
   
       To create a new object, you simply have to call its constructor(The one you specified the type with):
@@ -75,6 +67,15 @@ A parser generator for generating LR(1) parsers in C++. This parser generator is
       def addition(first:number, second:number);
       f:number <ADD> s:number -> addition(f, s);
       ```
+
+    Furthermore, it is also possible to add new members to lists of the member being returned.
+    The syntax for adding more members to a list looks like this:
+    ```
+    def list(name:Token, members:vec[value]);
+    l:list <COMMA> v:value -> l append (?, [v]);
+    name:<NAME> v:value -> list(name, []) append (?, [v]);
+    ```
+    The keyword "append" is used to do such a change to a return-object. You have to specify all changes to the individual members of the type. Members which you can't or doesn't want to append to have to be replaced with the placeholder '?'. You always have to put the objects you want to add to a list in square brackets. 
   
     A rule has to return a user defined type, so it is not possible to return lists or tokens.
 
