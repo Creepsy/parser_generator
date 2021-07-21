@@ -4,30 +4,7 @@
 #include <string>
 
 #include "rule_lexer.h"
-
-const std::vector<std::string> TOKEN_TYPE_TO_STR{{
-    "END_OF_FILE",
-    "UNDEFINED",
-    "WSPACE",
-    "COMMENT",
-    "ENTRY_POINT",
-    "EOL",
-    "PAR_OPEN",
-    "PAR_CLOSE",
-    "SQ_BRACKET_OPEN",
-    "SQ_BRACKET_CLOSE",
-    "RETURN",
-    "NONE",
-    "ASSIGN",
-    "SEPERATOR",
-    "DEFINE_TYPE",
-    "APPEND",
-    "VECTOR",
-    "TOKEN_TYPE",
-    "NAMESPACE",
-    "TOKEN",
-    "IDENTIFIER"
-}};
+#include "rule_parser/rule_parser.h"
 
 int main() {
     std::cout << "project setup!" << std::endl;
@@ -52,7 +29,7 @@ int main() {
 
     while(true) {
         token t = lex.next_unignored_token();
-        std::cout << TOKEN_TYPE_TO_STR[t.type] << " -> " << t.identifier
+        std::cout << rparser::TOKEN_TYPE_TO_STR[t.type] << " -> " << t.identifier
                   << ", [" << t.pos.start_line << "," << t.pos.start_column << "] to [" << t.pos.end_line << "," << t.pos.end_column << "]" << std::endl;
         if(t.type == token::END_OF_FILE) break;
     }

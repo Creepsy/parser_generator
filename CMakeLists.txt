@@ -13,10 +13,14 @@ add_custom_command(
 
 set(PROJECT_HEADERS
     ${CMAKE_BINARY_DIR}/rule_lexer.h
+    src/rule_parser/parser_infos.h
+    src/rule_parser/rule_parser.h
 )
 
 set(PROJECT_SOURCE_FILES
     ${CMAKE_BINARY_DIR}/rule_lexer.cpp
+    src/rule_parser/parser_infos.cpp
+    src/rule_parser/rule_parser.cpp
 )
 
 add_executable(parser_generator src/generator.cpp ${PROJECT_HEADERS} ${PROJECT_SOURCE_FILES})
