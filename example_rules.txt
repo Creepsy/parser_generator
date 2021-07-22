@@ -1,0 +1,10 @@
+def list: value(members:vec[value]); // list type
+def int: value, numeric(num:Token);
+def addition: value, numeric(first:numeric, operator:Token, second:numeric);
+
+// *l:list <EOF> -> l;
+// <PARO> l:list#enumeration <PARC> -> l;
+// n:<INT> -> int(n);
+// f:numeric op:<ADD> s:int -> addition(f, op, s);
+// #enumeration v:value -> list([v]);
+// #enumeration l:list#enumeration <SEP> v:value -> l append([v]);

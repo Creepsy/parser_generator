@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 
 #include <rule_lexer.h>
 
@@ -42,6 +43,11 @@ namespace rparser {
             bool accept(const std::vector<token::token_type>& types);
 
             void consume();
+            void consume(const token::token_type type);
+
+            parser_infos::type_definition parse_type_definition();
+            parser_infos::rule parse_rule();
+            parser_infos::type_parameter parse_type_parameter();
         public:
             rule_parser(rule_lexer& lexer);
             parser_infos::parser_info parse_parser_infos();

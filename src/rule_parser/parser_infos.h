@@ -9,6 +9,7 @@ namespace parser_infos {
     struct type_parameter {
         enum parameter_type {
             TOKEN,
+            SPECIFIC_TOKEN,
             CUSTOM_TYPE
         };
 
