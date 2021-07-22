@@ -139,8 +139,6 @@ parser_infos::rule rule_parser::parse_rule() {
 parser_infos::type_parameter rule_parser::parse_type_parameter() {
     parser_infos::type_parameter type_param{};
 
-    token type_token = this->curr;
-
     if(this->accept(token::token_type::IDENTIFIER)) {
         std::string identifier = this->curr.identifier;
         this->consume();
@@ -148,25 +146,33 @@ parser_infos::type_parameter rule_parser::parse_type_parameter() {
         if(this->accept(token::token_type::ASSIGN)) {
             this->consume();
 
+            type_param = this->parse_type_parameter();
+
+            if(!type_param.identifer.empty()) throw std::runtime_error("Multiple names for the same parameter(" + type_param.identifer + ", " + identifier + ")!");
             type_param.identifer = identifier;
-            type_token = this->curr;
-            this->consume();
+
+            return type_param;
+        } else {
+            type_param = parser_infos::type_parameter{parser_infos::type_parameter::CUSTOM_TYPE, identifier};
         }
     } else {
-        this->consume();
+        token type_token = this->curr;
+
+        if(this->accept(token::token_type::VECTOR)) {
+            this->consume();
+            type_param.is_vec = true;
+
+            this->consume(token::token_type::SQ_BRACKET_OPEN);
+            type_token = this->curr;
+            this->consume();
+            this->consume(token::token_type::SQ_BRACKET_CLOSE);
+        } else {
+            this->consume();
+        }
+
+        type_param.type_identifier = type_token.identifier;
+        type_param.type = parameter_type_from_token(type_token);
     }
-
-    if(type_token.type == token::token_type::VECTOR) {
-        type_param.is_vec = true;
-
-        this->consume(token::token_type::SQ_BRACKET_OPEN);
-        type_token = this->curr;
-        this->consume();
-        this->consume(token::token_type::SQ_BRACKET_CLOSE);
-    }
-
-    type_param.type_identifier = type_token.identifier;
-    type_param.type = parameter_type_from_token(type_token);
 
     while(this->accept(token::token_type::NAMESPACE)) {
         type_param.namespaces.insert(this->curr.identifier.substr(1));
