@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <iostream>
 
 namespace parser_infos {
     struct type_parameter {
@@ -59,12 +60,18 @@ namespace parser_infos {
        // std::set<std::string> base_types;
     };
 
-    class rule_state {
+    /*class rule_state {
         private:
         public:
             rule_state();
             ~rule_state();
-    };
+    };*/
+
+    std::ostream& operator<<(std::ostream& out, const type_parameter& to_print);
+    std::ostream& operator<<(std::ostream& out, const value_parameter& to_print);
+    std::ostream& operator<<(std::ostream& out, const type_definition& to_print);
+    std::ostream& operator<<(std::ostream& out, const rule_result& to_print);
+    std::ostream& operator<<(std::ostream& out, const rule& to_print);
 
     /*bool operator<(const rule& first, const rule& second);
     bool operator<(const type_definition& first, const type_definition& second);

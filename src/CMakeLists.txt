@@ -8,6 +8,7 @@ set(PROJECT_HEADERS
     ${CMAKE_BINARY_DIR}/rule_lexer.h
     rule_parser/parser_infos.h
     rule_parser/rule_parser.h
+    util.h
 )
 
 set(PROJECT_SOURCE_FILES
@@ -16,7 +17,11 @@ set(PROJECT_SOURCE_FILES
     rule_parser/rule_parser.cpp
 )
 
-add_library(parser_generator_src ${PROJECT_HEADERS} ${PROJECT_SOURCE_FILES})
+set(PROJECT_INLINE_FILES
+    util.ipp
+)
+
+add_library(parser_generator_src ${PROJECT_HEADERS} ${PROJECT_SOURCE_FILES} ${PROJECT_INLINE_FILES})
 
 include_directories(${CMAKE_BINARY_DIR})
 add_executable(parser_generator generator.cpp)
