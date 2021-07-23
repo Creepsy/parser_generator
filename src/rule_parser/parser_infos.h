@@ -51,14 +51,13 @@ namespace parser_infos {
         rule_result result;
 
         bool is_entry_rule = false;
-        std::string group = "";
+        std::string namesp = "";
     };
 
     struct parser_info {
         std::vector<rule> entry_rules;
         std::vector<rule> parser_rules;
         std::vector<type_definition> types;
-       // std::set<std::string> base_types;
     };
 
     /*class rule_state {
@@ -73,10 +72,4 @@ namespace parser_infos {
     std::ostream& operator<<(std::ostream& out, const type_definition& to_print);
     std::ostream& operator<<(std::ostream& out, const rule_result& to_print);
     std::ostream& operator<<(std::ostream& out, const rule& to_print);
-
-    /*bool operator<(const rule& first, const rule& second);
-    bool operator<(const type_definition& first, const type_definition& second);
-    bool operator<(const rule_result& first, const rule_result& second);
-    bool operator<(const type_parameter& first, const type_parameter& second);
-    bool operator<(const value_parameter& first, const value_parameter& second);*/
 }

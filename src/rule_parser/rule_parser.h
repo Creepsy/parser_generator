@@ -48,6 +48,10 @@ namespace rparser {
             parser_infos::type_definition parse_type_definition();
             parser_infos::rule parse_rule();
             parser_infos::type_parameter parse_type_parameter();
+            parser_infos::value_parameter parse_value_parameter();
+            std::string parse_value_parameter_identifier();
+            parser_infos::rule_result parse_rule_result();
+            std::vector<parser_infos::value_parameter> parse_arguments();
         public:
             rule_parser(rule_lexer& lexer);
             parser_infos::parser_info parse_parser_infos();

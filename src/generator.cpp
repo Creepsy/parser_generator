@@ -19,17 +19,20 @@ int main() {
     rparser::rule_parser pars{lex};
 
     parser_infos::parser_info p_info = pars.parse_parser_infos();
+    input.close();
 
+    std::cout << "Types: " << std::endl;
     for(const parser_infos::type_definition& type : p_info.types) std::cout << type << std::endl;
     
-    /*while(true) {
-        token t = lex.next_unignored_token();
-        std::cout << rparser::TOKEN_TYPE_TO_STR[t.type] << " -> " << t.identifier
-                  << ", [" << t.pos.start_line << "," << t.pos.start_column << "] to [" << t.pos.end_line << "," << t.pos.end_column << "]" << std::endl;
-        if(t.type == token::END_OF_FILE) break;
-    }*/
+    std::cout << std::endl;
 
-    input.close();
+    std::cout << "Rules: " << std::endl;
+    for(const parser_infos::rule& r : p_info.parser_rules) std::cout << r << std::endl;
+
+    std::cout << std::endl;
+
+    std::cout << "Entry rules: " << std::endl;
+    for(const parser_infos::rule& r : p_info.entry_rules) std::cout << r << std::endl;
 
     return 0;
 }

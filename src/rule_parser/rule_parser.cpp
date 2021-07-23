@@ -121,7 +121,7 @@ parser_infos::type_definition rule_parser::parse_type_definition() {
     }
 
     this->consume(token::token_type::PAR_OPEN);
-    while(!this->accept(token::token_type::PAR_CLOSE)) {
+    while(!this->accept(token::token_type::PAR_CLOSE) && !this->lexer.end()) {
         if(!defined_type.members.empty()) this->consume(token::token_type::SEPERATOR);
         defined_type.members.push_back(this->parse_type_parameter());
     }
@@ -133,7 +133,28 @@ parser_infos::type_definition rule_parser::parse_type_definition() {
 }
 
 parser_infos::rule rule_parser::parse_rule() {
-    return {};
+    parser_infos::rule parsed_rule{};
+
+    if(this->accept(token::token_type::ENTRY_POINT)) {
+        this->consume();
+        parsed_rule.is_entry_rule = true;
+    }
+
+    if(this->accept(token::token_type::NAMESPACE)) {
+        parsed_rule.namesp = this->curr.identifier.substr(1);
+        this->consume();
+    }
+
+    while(!this->accept(token::token_type::RETURN) && !this->lexer.end()) {
+        parsed_rule.parameters.push_back(this->parse_type_parameter());
+    }
+    this->consume(token::token_type::RETURN);
+    
+    parsed_rule.result = this->parse_rule_result();
+
+    this->consume(token::token_type::EOL);
+
+    return parsed_rule;
 }
 
 parser_infos::type_parameter rule_parser::parse_type_parameter() {
@@ -180,4 +201,77 @@ parser_infos::type_parameter rule_parser::parse_type_parameter() {
     }
 
     return type_param;
+}
+
+parser_infos::value_parameter rule_parser::parse_value_parameter() {
+    if(this->accept(token::token_type::SQ_BRACKET_OPEN)) {
+        this->consume();
+
+        parser_infos::value_parameter v_par{};
+
+        while(!this->accept(token::token_type::SQ_BRACKET_CLOSE) && !this->lexer.end()) {
+            if(!v_par.members.empty()) this->consume(token::token_type::SEPERATOR);
+            v_par.members.push_back(this->parse_value_parameter_identifier());
+        }
+
+        this->consume(token::token_type::SQ_BRACKET_CLOSE);
+
+        return v_par;
+    } else {
+        return parser_infos::value_parameter{std::vector<std::string>{this->parse_value_parameter_identifier()}};
+    }
+}
+
+std::string rule_parser::parse_value_parameter_identifier() {
+    this->expect(std::vector<token::token_type>{token::token_type::IDENTIFIER, token::token_type::NONE});
+
+    if(this->accept(token::token_type::NONE)) {
+        this->consume();
+        
+        return "?";
+    } else {
+        std::string member = this->curr.identifier;
+        this->consume();
+
+        return member;
+    }
+}
+
+parser_infos::rule_result rule_parser::parse_rule_result() {
+    this->expect(token::token_type::IDENTIFIER);
+    std::string operand = this->curr.identifier;
+    this->consume();
+
+    parser_infos::rule_result parsed_result{};
+    parsed_result.operand = operand;
+
+    if(this->accept(token::token_type::PAR_OPEN)) {
+        parsed_result.type = parser_infos::rule_result::result_type::NEW_OBJECT;
+        parsed_result.args = this->parse_arguments();
+    } else {
+        parsed_result.type = parser_infos::rule_result::result_type::PARAMETER;
+    }
+
+    if(this->accept(token::token_type::APPEND)) {
+        this->consume();
+        parsed_result.has_append = true;
+        parsed_result.append_args = this->parse_arguments();
+    }
+
+    return parsed_result;
+}
+
+std::vector<parser_infos::value_parameter> rule_parser::parse_arguments() {
+    this->consume(token::token_type::PAR_OPEN);
+
+    std::vector<parser_infos::value_parameter> args;
+    while(!this->accept(token::token_type::PAR_CLOSE) && !this->lexer.end()) {
+        if(!args.empty()) this->consume(token::token_type::SEPERATOR);
+
+        args.push_back(this->parse_value_parameter());
+    }
+
+    this->consume(token::token_type::PAR_CLOSE);
+
+    return args;
 }
