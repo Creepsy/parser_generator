@@ -69,7 +69,62 @@ parser_infos::parser_info rule_parser::parse_parser_infos() {
     return info;
 }
 
-rule_parser::~rule_parser() {
+parser_infos::type_definition rule_parser::parse_type_definition() {
+    this->consume(token::token_type::DEFINE_TYPE);
+
+    parser_infos::type_definition parsed_type{};
+
+    this->expect(token::token_type::IDENTIFIER);
+    parsed_type.type_name = this->curr.identifier;
+    this->consume();
+
+    if(this->accept(token::token_type::ASSIGN)) {
+        do {
+            this->consume();
+
+            this->expect(token::token_type::IDENTIFIER);
+            parsed_type.base_types.insert(this->curr.identifier);
+            this->consume();
+        } while(this->accept(token::token_type::SEPERATOR));
+    }
+
+    this->consume(token::token_type::PAR_OPEN);
+
+    while(!this->accept(token::token_type::PAR_CLOSE) && !this->lexer.end()) {
+        if(!parsed_type.members.empty()) this->consume(token::token_type::SEPERATOR);
+        parsed_type.members.push_back(this->parse_type_parameter());
+    }
+
+    this->consume(token::token_type::PAR_CLOSE);
+    this->consume(token::token_type::EOL);
+
+    return parsed_type;
+}
+
+parser_infos::rule rule_parser::parse_rule() {
+    parser_infos::rule parsed_rule{};
+
+    if(this->accept(token::token_type::ENTRY_POINT)) {
+        this->consume();
+        parsed_rule.is_entry_rule = true;
+    }
+
+    if(this->accept(token::token_type::NAMESPACE)) {
+        parsed_rule.namesp = this->curr.identifier.substr(1);
+        this->consume();
+    }
+
+    while(!this->accept(token::token_type::RETURN) && !this->lexer.end()) {
+        parsed_rule.parameters.push_back(this->parse_type_parameter());
+    }
+
+    this->consume(token::token_type::RETURN);
+    
+    parsed_rule.result = this->parse_rule_result();
+
+    this->consume(token::token_type::EOL);
+
+    return parsed_rule;
 }
 
 //private
@@ -101,62 +156,6 @@ void rule_parser::consume(const token::token_type type) {
     this->consume();
 }
 
-parser_infos::type_definition rule_parser::parse_type_definition() {
-    this->consume(token::token_type::DEFINE_TYPE);
-
-    parser_infos::type_definition defined_type{};
-
-    this->expect(token::token_type::IDENTIFIER);
-    defined_type.type_name = this->curr.identifier;
-    this->consume();
-
-    if(this->accept(token::token_type::ASSIGN)) {
-        do {
-            this->consume();
-
-            this->expect(token::token_type::IDENTIFIER);
-            defined_type.base_types.insert(this->curr.identifier);
-            this->consume();
-        } while(this->accept(token::token_type::SEPERATOR));
-    }
-
-    this->consume(token::token_type::PAR_OPEN);
-    while(!this->accept(token::token_type::PAR_CLOSE) && !this->lexer.end()) {
-        if(!defined_type.members.empty()) this->consume(token::token_type::SEPERATOR);
-        defined_type.members.push_back(this->parse_type_parameter());
-    }
-    this->consume(token::token_type::PAR_CLOSE);
-    
-    this->consume(token::token_type::EOL);
-
-    return defined_type;
-}
-
-parser_infos::rule rule_parser::parse_rule() {
-    parser_infos::rule parsed_rule{};
-
-    if(this->accept(token::token_type::ENTRY_POINT)) {
-        this->consume();
-        parsed_rule.is_entry_rule = true;
-    }
-
-    if(this->accept(token::token_type::NAMESPACE)) {
-        parsed_rule.namesp = this->curr.identifier.substr(1);
-        this->consume();
-    }
-
-    while(!this->accept(token::token_type::RETURN) && !this->lexer.end()) {
-        parsed_rule.parameters.push_back(this->parse_type_parameter());
-    }
-    this->consume(token::token_type::RETURN);
-    
-    parsed_rule.result = this->parse_rule_result();
-
-    this->consume(token::token_type::EOL);
-
-    return parsed_rule;
-}
-
 parser_infos::type_parameter rule_parser::parse_type_parameter() {
     parser_infos::type_parameter type_param{};
 
@@ -184,8 +183,10 @@ parser_infos::type_parameter rule_parser::parse_type_parameter() {
             type_param.is_vec = true;
 
             this->consume(token::token_type::SQ_BRACKET_OPEN);
+
             type_token = this->curr;
             this->consume();
+            
             this->consume(token::token_type::SQ_BRACKET_CLOSE);
         } else {
             this->consume();
@@ -211,30 +212,23 @@ parser_infos::value_parameter rule_parser::parse_value_parameter() {
 
         while(!this->accept(token::token_type::SQ_BRACKET_CLOSE) && !this->lexer.end()) {
             if(!v_par.members.empty()) this->consume(token::token_type::SEPERATOR);
-            v_par.members.push_back(this->parse_value_parameter_identifier());
+            v_par.members.push_back(this->parse_value_parameter_member());
         }
 
         this->consume(token::token_type::SQ_BRACKET_CLOSE);
 
         return v_par;
     } else {
-        return parser_infos::value_parameter{std::vector<std::string>{this->parse_value_parameter_identifier()}};
+        return parser_infos::value_parameter{std::vector<std::string>{this->parse_value_parameter_member()}};
     }
 }
 
-std::string rule_parser::parse_value_parameter_identifier() {
+std::string rule_parser::parse_value_parameter_member() {
     this->expect(std::vector<token::token_type>{token::token_type::IDENTIFIER, token::token_type::NONE});
+    std::string identifier = this->curr.identifier;
+    this->consume();
 
-    if(this->accept(token::token_type::NONE)) {
-        this->consume();
-        
-        return "?";
-    } else {
-        std::string member = this->curr.identifier;
-        this->consume();
-
-        return member;
-    }
+    return identifier;
 }
 
 parser_infos::rule_result rule_parser::parse_rule_result() {

@@ -4,14 +4,6 @@
 
 using namespace parser_infos;
 
-/*
-rule_state::rule_state() {
-}
-
-rule_state::~rule_state() {
-}
-*/
-
 std::ostream& parser_infos::operator<<(std::ostream& out, const type_parameter& to_print) {
     if(!to_print.identifer.empty()) out << to_print.identifer << ":";
     if(to_print.is_vec) {

@@ -59,14 +59,7 @@ namespace parser_infos {
         std::vector<rule> parser_rules;
         std::vector<type_definition> types;
     };
-
-    /*class rule_state {
-        private:
-        public:
-            rule_state();
-            ~rule_state();
-    };*/
-
+    
     std::ostream& operator<<(std::ostream& out, const type_parameter& to_print);
     std::ostream& operator<<(std::ostream& out, const value_parameter& to_print);
     std::ostream& operator<<(std::ostream& out, const type_definition& to_print);
