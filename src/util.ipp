@@ -1,8 +1,8 @@
-template<class t>
-std::ostream& util::print_vector(std::ostream& out, const std::vector<t> to_print, const std::string& seperator) {
-    for(size_t element = 0; element < to_print.size(); element++) {
-        if(element != 0) out << seperator;
-        out << to_print[element];
+template<class iterator>
+std::ostream& util::print_iterator(std::ostream& out, const iterator& start, const iterator& end, const std::string& seperator) {
+    for(iterator curr = start; curr != end; curr++) {
+        if(curr != start) out << seperator;
+        out << *curr;
     }
 
     return out;

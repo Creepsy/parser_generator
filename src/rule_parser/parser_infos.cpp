@@ -27,24 +27,19 @@ std::ostream& parser_infos::operator<<(std::ostream& out, const type_parameter& 
 
 std::ostream& parser_infos::operator<<(std::ostream& out, const value_parameter& to_print) {
     out << "[";
-    return util::print_vector(out, to_print.members, ", ") << "]";
+    return util::print_iterator(out, to_print.members.begin(), to_print.members.end(), ", ") << "]";
 }
 
 std::ostream& parser_infos::operator<<(std::ostream& out, const type_definition& to_print) {
     out << "def " << to_print.type_name;
     
-    for(std::set<std::string>::const_iterator base_type = to_print.base_types.begin(); base_type != to_print.base_types.end(); base_type++) {
-        if(base_type == to_print.base_types.begin()) {
-            out << ": ";
-        } else {
-            out << ", ";
-        }
-
-        out << *base_type;
+    if(!to_print.base_types.empty()) {
+        out << ": ";
+        util::print_iterator(out, to_print.base_types.begin(), to_print.base_types.end(), ", ");
     }
 
     out << "(";
-    return util::print_vector(out, to_print.members, ", ") << ");";
+    return util::print_iterator(out, to_print.members.begin(), to_print.members.end(), ", ") << ");";
 }
 
 std::ostream& parser_infos::operator<<(std::ostream& out, const rule_result& to_print) {
@@ -52,12 +47,12 @@ std::ostream& parser_infos::operator<<(std::ostream& out, const rule_result& to_
 
     if(to_print.type == rule_result::NEW_OBJECT) {
         out << "(";
-        util::print_vector(out, to_print.args, ", ") << ")";
+        util::print_iterator(out, to_print.args.begin(), to_print.args.end(), ", ") << ")";
     }
 
     if(to_print.has_append) {
         out << " append (";
-        util::print_vector(out, to_print.append_args, ", ") << ")";
+        util::print_iterator(out, to_print.append_args.begin(), to_print.append_args.end(), ", ") << ")";
     }
 
     return out;
@@ -67,5 +62,5 @@ std::ostream& parser_infos::operator<<(std::ostream& out, const rule& to_print) 
     if(!to_print.namesp.empty()) out << "#" << to_print.namesp << " ";
     if(to_print.is_entry_rule) out << "*";
 
-    return util::print_vector(out, to_print.parameters, " ") << " -> " << to_print.result << ";";
+    return util::print_iterator(out, to_print.parameters.begin(), to_print.parameters.end(), " ") << " -> " << to_print.result << ";";
 }
