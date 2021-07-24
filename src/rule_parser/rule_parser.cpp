@@ -127,6 +127,10 @@ parser_infos::rule rule_parser::parse_rule() {
     return parsed_rule;
 }
 
+bool rule_parser::end() {
+    return this->accept(token::token_type::END_OF_FILE);
+}
+
 //private
 void rule_parser::expect(const token::token_type type) {
     if(!this->accept(type)) throw_invalid_token_err(this->curr, std::vector<token::token_type>{type});

@@ -55,6 +55,7 @@ namespace rparser {
             parser_infos::parser_info parse_parser_infos();
             parser_infos::type_definition parse_type_definition();
             parser_infos::rule parse_rule();
+            bool end();
             ~rule_parser() = default;
     };
 }
