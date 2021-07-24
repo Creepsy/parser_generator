@@ -1,7 +1,9 @@
 #include <iostream>
 
+#include "rule_parser_tests.h"
+
 int main() {
-    std::cout << "PLACEHOLDER TEST PASSED!" << std::endl;
-    
+    rparser_tests::test();
+
     return 0;
 }
