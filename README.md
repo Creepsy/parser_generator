@@ -62,7 +62,7 @@ A parser generator for generating LR(1) parsers in C++. This parser generator is
       ```
     + Creating a new object:
   
-      To create a new object, you simply have to call its constructor(The one you specified the type with):
+      To create a new object, you simply have to call its constructor (The one you specified the type with). To group multiple values in a list, simply put them in square brackets seperated by a comma:
       ```
       def addition(first:number, second:number);
       f:number <ADD> s:number -> addition(f, s);
@@ -75,7 +75,7 @@ A parser generator for generating LR(1) parsers in C++. This parser generator is
     l:list <COMMA> v:value -> l append (?, [v]);
     name:<NAME> v:value -> list(name, []) append (?, [v]);
     ```
-    The keyword "append" is used to do such a change to a return-object. You have to specify all changes to the individual members of the type. Members which you can't or doesn't want to append to have to be replaced with the placeholder '?'. You always have to put the objects you want to add to a list in square brackets. 
+    The keyword "append" is used to do such a change to a return-object. You have to specify all changes to the individual members of the type. Members which you can't or doesn't want to append to have to be replaced with the placeholder '?'. 
   
     A rule has to return a user defined type, so it is not possible to return lists or tokens.
 
