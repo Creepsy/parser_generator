@@ -21,7 +21,7 @@ void rparser_tests::test_rule_parsing() {
 }
 
 void rparser_tests::test_type_parsing() {
-    std::stringstream valid_type_str {
+    std::stringstream valid_type_str{
         "def  atype   \t\t: value,   number, type(members:vec[value],    another:Token,  v  :number); //a type definition\n"
     };
 
@@ -30,11 +30,19 @@ void rparser_tests::test_type_parsing() {
 
     std::stringstream parser_result{""};
     parser_result << valid_pars.parse_type_definition();
-    std::cout << parser_result.str() << std::endl;
     tutils::test_for_success(parser_result.str() == "def atype: number, type, value(members:vec[value], another:Token, v:number);", "valid type parsing");
     tutils::test_for_success(valid_pars.end(), "reached EOF");
     
-    //TODO: test for error
+    tutils::test_for_error([]() { 
+            std::stringstream invalid_type_str{
+                "def  atype   \t\t: value,   number, type(members:vec[value,    another:Token,  v  :number); //a type definition\n"
+            };
+
+            rule_lexer invalid_lex{invalid_type_str};
+            rparser::rule_parser invalid_pars{invalid_lex};
+            invalid_pars.parse_type_definition(); 
+        }, "invalid type parsing"
+    );
 }
 
 void rparser_tests::test_input_parsing() {
