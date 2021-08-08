@@ -46,10 +46,10 @@ namespace rparser {
             void consume(const token::token_type type);
 
             parser_infos::type_parameter parse_type_parameter();
-            parser_infos::value_parameter parse_value_parameter();
-            std::string parse_value_parameter_member();
+            parser_infos::value_list parse_value_list();
+            parser_infos::value parse_value();
             parser_infos::rule_result parse_rule_result();
-            std::vector<parser_infos::value_parameter> parse_arguments();
+            std::vector<parser_infos::value_list> parse_arguments();
         public:
             rule_parser(rule_lexer& lexer);
             parser_infos::parser_info parse_parser_infos();

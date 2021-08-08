@@ -17,7 +17,11 @@ std::ostream& parser_infos::operator<<(std::ostream& out, const type_parameter& 
     return out;
 }
 
-std::ostream& parser_infos::operator<<(std::ostream& out, const value_parameter& to_print) {
+std::ostream& parser_infos::operator<<(std::ostream& out, const value& to_print) {
+    return out << to_print.identifier;
+}
+
+std::ostream& parser_infos::operator<<(std::ostream& out, const value_list& to_print) {
     out << "[";
     return util::print_iterator(out, to_print.members.begin(), to_print.members.end(), ", ") << "]";
 }

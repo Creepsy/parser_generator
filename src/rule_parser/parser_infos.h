@@ -5,6 +5,7 @@
 #include <set>
 #include <iostream>
 
+
 namespace parser_infos {
     struct type_parameter {
         enum parameter_type {
@@ -21,8 +22,18 @@ namespace parser_infos {
         std::set<std::string> namespaces = {};
     };
 
-    struct value_parameter {
-        std::vector<std::string> members;
+    struct value {
+        enum value_type {
+            NONE,
+            PARAMETER
+        };
+
+        std::string identifier;
+        value_type type;
+    };
+
+    struct value_list {
+        std::vector<value> members;
     };
 
     struct type_definition {
@@ -41,9 +52,9 @@ namespace parser_infos {
         result_type type;
         std::string operand;
 
-        std::vector<value_parameter> args = {};
+        std::vector<value_list> args = {};
         bool has_append = false;
-        std::vector<value_parameter> append_args = {};
+        std::vector<value_list> append_args = {};
     };
 
     struct rule {
@@ -61,7 +72,8 @@ namespace parser_infos {
     };
     
     std::ostream& operator<<(std::ostream& out, const type_parameter& to_print);
-    std::ostream& operator<<(std::ostream& out, const value_parameter& to_print);
+    std::ostream& operator<<(std::ostream& out, const value& to_print);
+    std::ostream& operator<<(std::ostream& out, const value_list& to_print);
     std::ostream& operator<<(std::ostream& out, const type_definition& to_print);
     std::ostream& operator<<(std::ostream& out, const rule_result& to_print);
     std::ostream& operator<<(std::ostream& out, const rule& to_print);

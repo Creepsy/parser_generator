@@ -208,31 +208,33 @@ parser_infos::type_parameter rule_parser::parse_type_parameter() {
     return type_param;
 }
 
-parser_infos::value_parameter rule_parser::parse_value_parameter() {
+parser_infos::value_list rule_parser::parse_value_list() {
     if(this->accept(token::token_type::SQ_BRACKET_OPEN)) {
         this->consume();
 
-        parser_infos::value_parameter v_par{};
+        parser_infos::value_list v_par{};
 
         while(!this->accept(token::token_type::SQ_BRACKET_CLOSE) && !this->lexer.end()) {
             if(!v_par.members.empty()) this->consume(token::token_type::SEPERATOR);
-            v_par.members.push_back(this->parse_value_parameter_member());
+            v_par.members.push_back(this->parse_value());
         }
 
         this->consume(token::token_type::SQ_BRACKET_CLOSE);
 
         return v_par;
     } else {
-        return parser_infos::value_parameter{std::vector<std::string>{this->parse_value_parameter_member()}};
+        return parser_infos::value_list{std::vector<parser_infos::value>{this->parse_value()}};
     }
 }
 
-std::string rule_parser::parse_value_parameter_member() {
+parser_infos::value rule_parser::parse_value() {
     this->expect(std::vector<token::token_type>{token::token_type::IDENTIFIER, token::token_type::NONE});
-    std::string identifier = this->curr.identifier;
+    
+    parser_infos::value parsed{this->curr.identifier,
+                              (this->accept(token::token_type::NONE) ? parser_infos::value::value_type::NONE : parser_infos::value::value_type::PARAMETER)};
     this->consume();
 
-    return identifier;
+    return parsed;
 }
 
 parser_infos::rule_result rule_parser::parse_rule_result() {
@@ -259,14 +261,14 @@ parser_infos::rule_result rule_parser::parse_rule_result() {
     return parsed_result;
 }
 
-std::vector<parser_infos::value_parameter> rule_parser::parse_arguments() {
+std::vector<parser_infos::value_list> rule_parser::parse_arguments() {
     this->consume(token::token_type::PAR_OPEN);
 
-    std::vector<parser_infos::value_parameter> args;
+    std::vector<parser_infos::value_list> args;
     while(!this->accept(token::token_type::PAR_CLOSE) && !this->lexer.end()) {
         if(!args.empty()) this->consume(token::token_type::SEPERATOR);
 
-        args.push_back(this->parse_value_parameter());
+        args.push_back(this->parse_value_list());
     }
 
     this->consume(token::token_type::PAR_CLOSE);
