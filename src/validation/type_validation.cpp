@@ -7,11 +7,15 @@ using namespace validation;
 #include <string>
 #include <stdexcept>
 
+#include "../util.h"
+
 //helper functions
 void throw_validation_error(const std::string& message);
 
 void validate_type(const parser_infos::type_definition& to_validate, const std::set<std::string>& base_types, const std::set<std::string>& types);
 void check_for_doubled_types(const std::vector<parser_infos::type_definition>& types);
+void validate_base_types(const std::set<std::string>& base_types);
+void check_for_reserved_types(const std::string& type_name);
 
 void throw_validation_error(const std::string& message) {
     throw std::runtime_error("Validation Error: " + message);
@@ -21,14 +25,15 @@ void validate_type(const parser_infos::type_definition& to_validate, const std::
     if(base_types.find(to_validate.type_name) != base_types.end()) 
         throw_validation_error("The type '" + to_validate.type_name + "' is already a base type!");
 
-    if(to_validate.type_name == "node_base" || to_validate.type_name == "token_node")
-        throw_validation_error("The type '" + to_validate.type_name + "' is a reserved base type!");
+    check_for_reserved_types(to_validate.type_name);
 
     for(const parser_infos::type_parameter& par : to_validate.members) {
         if(par.type == parser_infos::type_parameter::parameter_type::SPECIFIC_TOKEN) 
             throw_validation_error("Specific tokens aren't allowed as member types!");
 
         if(par.type == parser_infos::type_parameter::parameter_type::CUSTOM_TYPE) {
+            check_for_reserved_types(par.type_identifier);
+            
             if(base_types.find(par.type_identifier) == base_types.end() && types.find(par.type_identifier) == types.end())
                 throw_validation_error("The type '" + par.type_identifier + "' is used as a member type but doesn't exist!");
         }
@@ -45,6 +50,17 @@ void check_for_doubled_types(const std::vector<parser_infos::type_definition>& t
     }
 }
 
+void validate_base_types(const std::set<std::string>& base_types) {
+    for(const std::string& base_type : base_types) {
+        check_for_reserved_types(base_type);
+    }
+}
+
+void check_for_reserved_types(const std::string& type_name) {
+    if(type_name == util::BASE_NODE_NAME || type_name == util::TOKEN_NODE_NAME)
+        throw_validation_error("The type '" + type_name + "' is a reserved type which can't be used!");
+}
+
 
 
 void validation::validate_types(const parser_infos::parser_info& to_validate) {
@@ -52,6 +68,7 @@ void validation::validate_types(const parser_infos::parser_info& to_validate) {
     const std::set<std::string> types = to_validate.get_type_names();
 
     check_for_doubled_types(to_validate.types);
+    validate_base_types(base_types);
 
     for(const parser_infos::type_definition& type : to_validate.types) {
         validate_type(type, base_types, types);
