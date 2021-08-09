@@ -6,15 +6,22 @@ add_custom_command(
 
 set(PROJECT_HEADERS
     ${CMAKE_BINARY_DIR}/rule_lexer.h
+
     rule_parser/parser_infos.h
     rule_parser/rule_parser.h
+
+    validation/type_validation.h
+
     util.h
 )
 
 set(PROJECT_SOURCE_FILES
     ${CMAKE_BINARY_DIR}/rule_lexer.cpp
+
     rule_parser/parser_infos.cpp
     rule_parser/rule_parser.cpp
+    
+    validation/type_validation.cpp
 )
 
 set(PROJECT_INLINE_FILES
