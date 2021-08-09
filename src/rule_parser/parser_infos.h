@@ -69,6 +69,9 @@ namespace parser_infos {
         std::vector<rule> entry_rules;
         std::vector<rule> parser_rules;
         std::vector<type_definition> types;
+
+        std::set<std::string> get_base_type_names() const;
+        std::set<std::string> get_type_names() const;
     };
     
     std::ostream& operator<<(std::ostream& out, const type_parameter& to_print);

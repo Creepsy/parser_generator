@@ -4,6 +4,26 @@
 
 using namespace parser_infos;
 
+std::set<std::string> parser_infos::parser_info::get_base_type_names() const {
+    std::set<std::string> base_types;
+    
+    for(const type_definition& type : this->types) {
+        base_types.insert(type.base_types.begin(), type.base_types.end());
+    }
+
+    return base_types;
+}
+
+std::set<std::string> parser_infos::parser_info::get_type_names() const {
+    std::set<std::string> types;
+    
+    for(const type_definition& type : this->types) {
+        types.insert(type.type_name);
+    }
+
+    return types;
+}
+
 std::ostream& parser_infos::operator<<(std::ostream& out, const type_parameter& to_print) {
     if(!to_print.identifer.empty()) out << to_print.identifer << ":";
     if(to_print.is_vec) {
