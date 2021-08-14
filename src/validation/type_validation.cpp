@@ -13,6 +13,7 @@ using namespace validation;
 void throw_validation_error(const std::string& message);
 
 void validate_type(const parser_infos::type_definition& to_validate, const std::set<std::string>& base_types, const std::set<std::string>& types);
+void check_type_members(const parser_infos::type_definition& to_validate, const std::set<std::string> base_types, const std::set<std::string>& types);
 void check_for_doubled_types(const std::vector<parser_infos::type_definition>& types);
 void validate_base_types(const std::set<std::string>& base_types);
 void check_for_reserved_types(const std::string& type_name);
@@ -26,6 +27,11 @@ void validate_type(const parser_infos::type_definition& to_validate, const std::
         throw_validation_error("The type '" + to_validate.type_name + "' is already a base type!");
 
     check_for_reserved_types(to_validate.type_name);
+    check_type_members(to_validate, base_types, types);
+}
+
+void check_type_members(const parser_infos::type_definition& to_validate, const std::set<std::string> base_types, const std::set<std::string>& types) {
+    std::set<std::string> used_identifiers;
 
     for(const parser_infos::type_parameter& par : to_validate.members) {
         if(par.type == parser_infos::type_parameter::parameter_type::SPECIFIC_TOKEN) 
@@ -37,6 +43,13 @@ void validate_type(const parser_infos::type_definition& to_validate, const std::
             if(base_types.find(par.type_identifier) == base_types.end() && types.find(par.type_identifier) == types.end())
                 throw_validation_error("The type '" + par.type_identifier + "' is used as a member type but doesn't exist!");
         }
+
+        if(par.identifer.empty())
+            throw_validation_error("Every type member needs a name!");
+
+        if(used_identifiers.find(par.identifer) != used_identifiers.end())
+            throw_validation_error("Multiple members have the same identifier '" + par.identifer + "'!");
+        used_identifiers.insert(par.identifer);
     }
 }
 

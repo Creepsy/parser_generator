@@ -41,6 +41,8 @@ namespace parser_infos {
         std::vector<type_parameter> members;
 
         std::set<std::string> base_types = {};
+
+        void complete_missing_names();
     };
 
     struct rule_result {

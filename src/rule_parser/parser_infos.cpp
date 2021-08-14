@@ -4,6 +4,14 @@
 
 using namespace parser_infos;
 
+void parser_infos::type_definition::complete_missing_names() {
+    size_t next_base_id = 0;
+    
+    for(parser_infos::type_parameter& par : this->members) {
+        if(par.identifer.empty()) par.identifer = "member_" + std::to_string(next_base_id++);
+    }
+}
+
 std::set<std::string> parser_infos::parser_info::get_base_type_names() const {
     std::set<std::string> base_types;
     

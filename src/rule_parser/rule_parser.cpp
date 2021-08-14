@@ -98,6 +98,7 @@ parser_infos::type_definition rule_parser::parse_type_definition() {
     this->consume(token::token_type::PAR_CLOSE);
     this->consume(token::token_type::EOL);
 
+    parsed_type.complete_missing_names();
     return parsed_type;
 }
 
