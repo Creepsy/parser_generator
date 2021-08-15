@@ -10,7 +10,7 @@ A parser generator for generating LR(1) parsers in C++. This parser generator is
     Here "addition" would be the name of the type. This type would have 2 members with the names "first_member" and "second_member".
 
     #### Defining a member
-    The definition of a member consists of the name of the member followed by a colon and the member type (see 2. Possible member types for more information).
+    The definition of a member consists of the name of the member followed by a colon and the member type (see 2. Possible member types for more information). The name of a member is optional. Members without one get named after the following scheme: member_\<id\> with "id" starting with 0.
 
     #### Grouping multiple types
     
