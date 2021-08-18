@@ -8,6 +8,7 @@
 #include "rule_parser/rule_parser.h"
 
 #include "validation/type_validation.h"
+#include "validation/rule_validation.h"
 
 int main() {
     std::ifstream input{"../example_rules.txt"};
@@ -24,6 +25,7 @@ int main() {
     input.close();
     
     validation::validate_types(p_info);
+    validation::validate_rules(p_info);
 
     std::cout << "Types: " << std::endl;
     for(const parser_infos::type_definition& type : p_info.types) std::cout << type << std::endl;

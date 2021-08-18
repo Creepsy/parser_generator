@@ -11,6 +11,8 @@ set(PROJECT_HEADERS
     rule_parser/rule_parser.h
 
     validation/type_validation.h
+    validation/rule_validation.h
+    validation/validation_utils.h
 
     util.h
 )
@@ -22,6 +24,8 @@ set(PROJECT_SOURCE_FILES
     rule_parser/rule_parser.cpp
     
     validation/type_validation.cpp
+    validation/rule_validation.cpp
+    validation/validation_utils.cpp
 )
 
 set(PROJECT_INLINE_FILES
