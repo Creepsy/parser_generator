@@ -12,6 +12,17 @@ void parser_infos::type_definition::complete_missing_names() {
     }
 }
 
+std::set<std::pair<std::string, size_t>> parser_infos::rule::get_parameters() const {
+    std::set<std::pair<std::string, size_t>> parameters;
+
+    for(size_t par = 0; par < this->parameters.size(); par++) {
+        if(!this->parameters[par].identifer.empty())
+            parameters.insert(std::make_pair(this->parameters[par].identifer, par));
+    }
+
+    return parameters;
+}
+
 std::set<std::string> parser_infos::parser_info::get_base_type_names() const {
     std::set<std::string> base_types;
     

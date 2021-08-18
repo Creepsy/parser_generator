@@ -8,19 +8,15 @@ using namespace validation;
 #include <stdexcept>
 
 #include "../util.h"
+#include "validation_utils.h"
 
 //helper functions
-void throw_validation_error(const std::string& message);
 
 void validate_type(const parser_infos::type_definition& to_validate, const std::set<std::string>& base_types, const std::set<std::string>& types);
 void check_type_members(const parser_infos::type_definition& to_validate, const std::set<std::string> base_types, const std::set<std::string>& types);
 void check_for_doubled_types(const std::vector<parser_infos::type_definition>& types);
 void validate_base_types(const std::set<std::string>& base_types);
 void check_for_reserved_types(const std::string& type_name);
-
-void throw_validation_error(const std::string& message) {
-    throw std::runtime_error("Validation Error: " + message);
-}
 
 void validate_type(const parser_infos::type_definition& to_validate, const std::set<std::string>& base_types, const std::set<std::string>& types) {
     if(base_types.find(to_validate.type_name) != base_types.end()) 

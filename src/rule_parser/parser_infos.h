@@ -4,7 +4,8 @@
 #include <vector>
 #include <set>
 #include <iostream>
-
+#include <utility>
+#include <cstddef>
 
 namespace parser_infos {
     struct type_parameter {
@@ -65,6 +66,8 @@ namespace parser_infos {
 
         bool is_entry_rule = false;
         std::string namesp = "";
+
+        std::set<std::pair<std::string, size_t>> get_parameters() const;
     };
 
     struct parser_info {
