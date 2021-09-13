@@ -6,30 +6,13 @@ add_custom_command(
 
 set(PROJECT_HEADERS
     ${CMAKE_BINARY_DIR}/rule_lexer.h
-
-    rule_parser/parser_infos.h
-    rule_parser/rule_parser.h
-
-    validation/type_validation.h
-    validation/rule_validation.h
-    validation/validation_utils.h
-
-    util.h
 )
 
 set(PROJECT_SOURCE_FILES
     ${CMAKE_BINARY_DIR}/rule_lexer.cpp
-
-    rule_parser/parser_infos.cpp
-    rule_parser/rule_parser.cpp
-    
-    validation/type_validation.cpp
-    validation/rule_validation.cpp
-    validation/validation_utils.cpp
 )
 
 set(PROJECT_INLINE_FILES
-    util.ipp
 )
 
 add_library(parser_generator_src ${PROJECT_HEADERS} ${PROJECT_SOURCE_FILES} ${PROJECT_INLINE_FILES})
