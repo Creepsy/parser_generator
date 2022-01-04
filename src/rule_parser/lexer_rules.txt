@@ -1,2 +1,3 @@
 $WSPACE \s+
 $COMMENT //.*
+ENTRY_POINT \*

@@ -1,2 +1,9 @@
 $WSPACE \s+
 $COMMENT //.*
+EOL ;
+PAR_OPEN \(
+PAR_CLOSE \)
+ASSIGN \:
+SEPERATOR \,
+TOKEN_TYPE Token
+IDENTIFIER [a-zA-Z_]\w*

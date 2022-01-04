@@ -1,17 +1,17 @@
 #include <iostream>
 #include <fstream>
 
-#include "rule_lexer.h"
+#include <type_lexer.h>
 
 int main() {
-    std::ifstream input{"../example_parser.rules"};
+    std::ifstream input{"../example_parser.types"};
 
     if(!input.is_open()) {
         std::cerr << "Unable to open input file!" << std::endl;
         return -1;
     }
 
-    rule_lexer lex{input};
+    type_lexer lex{input};
 
     while(!lex.end()) {
         token next = lex.next_unignored_token();
