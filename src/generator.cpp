@@ -4,7 +4,7 @@
 #include "rule_lexer.h"
 
 int main() {
-    std::ifstream input{"../example_rules.txt"};
+    std::ifstream input{"../example_parser.rules"};
 
     if(!input.is_open()) {
         std::cerr << "Unable to open input file!" << std::endl;
