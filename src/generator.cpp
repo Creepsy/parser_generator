@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 
-#include <type_lexer.h>
+#include "type_parser/parser.h"
 
 int main() {
     std::ifstream input{"../example_parser.types"};
@@ -13,10 +13,16 @@ int main() {
 
     type_lexer lex{input};
 
-    while(!lex.end()) {
-        token next = lex.next_unignored_token();
-        std::cout << next.type << ", " << next.identifier << std::endl;
+    type_parser::TypeParser parser{lex};
+
+    while(!parser.end()) {
+        parser.parse_next_type();
     }
+
+    // while(!lex.end()) {
+    //     token next = lex.next_unignored_token();
+    //     std::cout << next.type << ", " << next.identifier << std::endl;
+    // }
    
     return 0;
 }
