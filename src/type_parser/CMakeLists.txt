@@ -18,7 +18,7 @@ file(GLOB_RECURSE TYPE_PARSER_INLINE_FILES
 
 set(LEXER_FILES
     ${CMAKE_BINARY_DIR}/type_lexer.cpp
-    ${CMAKE_BINARY_DIR}/type_lexer.h
 )
 
+include_directories(${CMAKE_BINARY_DIR})
 add_library(type_parser_lib ${TYPE_PARSER_HEADERS} ${TYPE_PARSER_SOURCES} ${TYPE_PARSER_INLINE_FILES} ${LEXER_FILES})

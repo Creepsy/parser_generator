@@ -18,7 +18,7 @@ file(GLOB_RECURSE RULE_PARSER_INLINE_FILES
 
 set(LEXER_FILES
     ${CMAKE_BINARY_DIR}/rule_lexer.cpp
-    ${CMAKE_BINARY_DIR}/rule_lexer.h
 )
 
+include_directories(${CMAKE_BINARY_DIR})
 add_library(rule_parser_lib ${RULE_PARSER_HEADERS} ${RULE_PARSER_SOURCES} ${RULE_PARSER_INLINE_FILES} ${LEXER_FILES})
