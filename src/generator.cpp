@@ -16,7 +16,7 @@ int main() {
     type_parser::TypeParser parser{lex};
 
     while(!parser.end()) {
-        parser.parse_next_type();
+        std::cout << parser.parse_next_type() << "\n" << std::endl;
     }
 
     // while(!lex.end()) {
