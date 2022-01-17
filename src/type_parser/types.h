@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <ostream>
 #include <utility>
 
 namespace type_parser {
@@ -14,4 +15,6 @@ namespace type_parser {
         std::vector<std::string> base_types;
         std::vector<Parameter> parameters;
     };
+
+    std::ostream& operator<<(std::ostream& stream, const TypeDefinition& to_write);
 }
