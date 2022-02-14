@@ -1,3 +1,12 @@
 $WSPACE \s+
 $COMMENT //.*
 ENTRY_POINT \*
+EMPTY EMPTY
+PAR_OPEN \(
+PAR_CLOSE \)
+EOL ;
+ASSIGN \:
+SEPERATOR \,
+TOKEN <[a-zA-Z_]\w*>
+INDEX $\d+
+IDENTIFIER [a-zA-Z_]\w*

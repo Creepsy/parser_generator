@@ -1,6 +1,3 @@
-*l:list <EOF> -> l;
-<PARO> l:list#enumeration <PARC> -> l;
-n:<INT> -> int(n);
-f:numeric op:<ADD> s:int -> addition(f, op, s);
-#enumeration v:value -> list([v]);
-#enumeration l:list#enumeration <SEP> v:value -> l append([v]);
+* numeric <EOF> : $0;
+numeric <ADD> int : addition($0, $1, $2);
+<INT> : int($0);
