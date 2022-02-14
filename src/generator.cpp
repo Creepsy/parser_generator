@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "type_parser/parser.h"
+#include "type_parser/type_parser.h"
 
 int main() {
     std::ifstream input{"../example_parser.types"};
