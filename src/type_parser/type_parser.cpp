@@ -6,39 +6,39 @@
 
 using namespace type_parser;
 
-TypeParser::TypeParser(type_lexer& lexer) : lexer(lexer) {
+TypeParser::TypeParser(type_lexer::type_lexer& lexer) : lexer(lexer) {
     this->consume();
 }
 
 TypeDefinition TypeParser::parse_next_type() {
-    std::string type_identifier = this->consume(token::token_type::IDENTIFIER).identifier;
+    std::string type_identifier = this->consume(type_lexer::token::token_type::IDENTIFIER).identifier;
 
-    this->consume(token::token_type::PAR_OPEN);
+    this->consume(type_lexer::token::token_type::PAR_OPEN);
 
     //parse base types
     std::vector<std::string> base_types;
     
-    while(!this->accept(token::token_type::PAR_CLOSE)) {
-        if(!base_types.empty()) this->consume(token::token_type::SEPERATOR);
+    while(!this->accept(type_lexer::token::token_type::PAR_CLOSE)) {
+        if(!base_types.empty()) this->consume(type_lexer::token::token_type::SEPERATOR);
 
-        base_types.push_back(this->consume(token::token_type::IDENTIFIER).identifier);
+        base_types.push_back(this->consume(type_lexer::token::token_type::IDENTIFIER).identifier);
     }
 
-    this->consume(token::token_type::PAR_CLOSE);
-    this->consume(token::token_type::ASSIGN);
+    this->consume(type_lexer::token::token_type::PAR_CLOSE);
+    this->consume(type_lexer::token::token_type::ASSIGN);
 
     //parse parameters
     std::vector<Parameter> parameters;
 
-    while(!this->accept(token::token_type::EOL)) {
-        if(!parameters.empty()) this->consume(token::token_type::SEPERATOR);
+    while(!this->accept(type_lexer::token::token_type::EOL)) {
+        if(!parameters.empty()) this->consume(type_lexer::token::token_type::SEPERATOR);
 
-        std::string name = this->consume(token::token_type::IDENTIFIER).identifier;
-        this->consume(token::token_type::ASSIGN);
-        parameters.push_back(std::make_pair(name, this->consume(token::token_type::IDENTIFIER).identifier));
+        std::string name = this->consume(type_lexer::token::token_type::IDENTIFIER).identifier;
+        this->consume(type_lexer::token::token_type::ASSIGN);
+        parameters.push_back(std::make_pair(name, this->consume(type_lexer::token::token_type::IDENTIFIER).identifier));
     }
 
-    this->consume(token::token_type::EOL);
+    this->consume(type_lexer::token::token_type::EOL);
 
     return TypeDefinition{type_identifier, base_types, parameters};    
 }
@@ -54,22 +54,22 @@ TypeParser::~TypeParser() {
 
 //private
 
-void TypeParser::expect(const token::token_type to_expect) {
+void TypeParser::expect(const type_lexer::token::token_type to_expect) {
     if(!this->accept(to_expect)) this->throw_parse_err();
 }
 
-bool TypeParser::accept(const token::token_type to_check) {
+bool TypeParser::accept(const type_lexer::token::token_type to_check) {
     return this->curr.type == to_check;
 }
 
-token TypeParser::consume() {
-    token consumed = this->curr;
+type_lexer::token TypeParser::consume() {
+    type_lexer::token consumed = this->curr;
     this->curr = this->lexer.next_unignored_token();
 
     return consumed;
 }
 
-token TypeParser::consume(const token::token_type to_expect) {
+type_lexer::token TypeParser::consume(const type_lexer::token::token_type to_expect) {
     this->expect(to_expect);
 
     return this->consume();
