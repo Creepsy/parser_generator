@@ -6,8 +6,7 @@
 
 using namespace type_parser;
 
-TypeParser::TypeParser(type_lexer::type_lexer& lexer) : lexer(lexer) {
-    this->consume();
+TypeParser::TypeParser(type_lexer::type_lexer& lexer) : ParserBase(lexer) {
 }
 
 TypeDefinition TypeParser::parse_next_type() {
@@ -48,38 +47,4 @@ bool TypeParser::end() {
 }
 
 TypeParser::~TypeParser() {
-}
-
-
-
-//private
-
-void TypeParser::expect(const type_lexer::token::token_type to_expect) {
-    if(!this->accept(to_expect)) this->throw_parse_err();
-}
-
-bool TypeParser::accept(const type_lexer::token::token_type to_check) {
-    return this->curr.type == to_check;
-}
-
-type_lexer::token TypeParser::consume() {
-    type_lexer::token consumed = this->curr;
-    this->curr = this->lexer.next_unignored_token();
-
-    return consumed;
-}
-
-type_lexer::token TypeParser::consume(const type_lexer::token::token_type to_expect) {
-    this->expect(to_expect);
-
-    return this->consume();
-}
-
-void TypeParser::throw_parse_err() {
-    constexpr auto format_position = [](size_t line, size_t column) -> std::string { return "[L:" + std::to_string(line) + ", C:" + std::to_string(column) + "]"; };
-
-    throw std::runtime_error("Parsing Error at: \"" + this->curr.identifier + "\" " +
-            format_position(this->curr.pos.start_line, this->curr.pos.start_column) + "-" + 
-            format_position(this->curr.pos.end_line, this->curr.pos.end_column)
-    );
 }
