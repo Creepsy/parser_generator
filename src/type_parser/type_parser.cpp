@@ -42,9 +42,5 @@ TypeDefinition TypeParser::parse_next_type() {
     return TypeDefinition{type_identifier, base_types, parameters};    
 }
 
-bool TypeParser::end() {
-    return this->lexer.end();
-}
-
 TypeParser::~TypeParser() {
 }

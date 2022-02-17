@@ -8,11 +8,10 @@
 #include "types.h"
 
 namespace type_parser {
-    class TypeParser : ParserBase<type_lexer::type_lexer, type_lexer::token> {
+    class TypeParser : public ParserBase<type_lexer::type_lexer, type_lexer::token> {
         public:
             TypeParser(type_lexer::type_lexer& lexer);
             TypeDefinition parse_next_type();
-            bool end();
             ~TypeParser();
     };
 }

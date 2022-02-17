@@ -4,6 +4,11 @@ ParserBase<lexer_t, token_t>::ParserBase(lexer_t& lexer) : lexer(lexer) {
 }
 
 template<typename lexer_t, TokenBase token_t>
+bool ParserBase<lexer_t, token_t>::end() {
+    return this->lexer.end();
+}
+
+template<typename lexer_t, TokenBase token_t>
 ParserBase<lexer_t, token_t>::~ParserBase() {
 }
 

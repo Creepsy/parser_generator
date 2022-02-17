@@ -26,6 +26,7 @@ class ParserBase {
         void throw_parse_err();
     public:
         ParserBase(lexer_t& lexer);
+        bool end();
         virtual ~ParserBase();
 };
 
