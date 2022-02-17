@@ -13,13 +13,15 @@ int main() {
     }
 
     rule_lexer::rule_lexer rule_lex{rule_input};
+    rule_parser::RuleParser rule_pars{rule_lex};
 
-    while(!rule_lex.end()) {
-        rule_lexer::token next = rule_lex.next_unignored_token();
-        std::cout << next.type << ", " << next.identifier << std::endl;
+    while(!rule_pars.end()) {
+        std::cout << rule_pars.parse_next_rule() << std::endl;
     }
 
-     std::ifstream type_input{"../example_parser.types"};
+    std::cout << std::endl;
+
+    std::ifstream type_input{"../example_parser.types"};
 
     if(!type_input.is_open()) {
         std::cerr << "Unable to open input file!" << std::endl;
@@ -27,7 +29,6 @@ int main() {
     }
 
     type_lexer::type_lexer type_lex{type_input};
-
     type_parser::TypeParser type_pars{type_lex};
 
     while(!type_pars.end()) {
