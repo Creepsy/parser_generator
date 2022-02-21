@@ -5,7 +5,7 @@ ParserBase<lexer_t, token_t>::ParserBase(lexer_t& lexer) : lexer(lexer) {
 
 template<typename lexer_t, TokenBase token_t>
 bool ParserBase<lexer_t, token_t>::end() {
-    return this->lexer.end();
+    return this->curr.type == token_t::token_type::END_OF_FILE;
 }
 
 template<typename lexer_t, TokenBase token_t>

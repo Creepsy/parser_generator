@@ -3,6 +3,7 @@
 template <typename token_t>
 concept TokenBase = requires (token_t t){
     typename token_t::token_type;
+    token_t::token_type::END_OF_FILE;
     t.pos;
     t.pos.start_line;
     t.pos.start_column;
