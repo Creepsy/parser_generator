@@ -2,6 +2,8 @@
 #include <fstream>
 
 #include "type_parser/type_parser.h"
+#include "type_parser/type_validator.h"
+
 #include "rule_parser/rule_parser.h"
 
 int main() {
@@ -39,6 +41,7 @@ int main() {
         std::cout << types.back() << "\n" << std::endl;
     }
 
+    type_parser::validate_types(types);
     type_parser::TypeInfoTable type_infos = type_parser::construct_type_info_table(types);
 
     std::cout << type_infos << std::endl;
