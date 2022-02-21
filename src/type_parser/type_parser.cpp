@@ -15,12 +15,12 @@ TypeDefinition TypeParser::parse_next_type() {
     this->consume(type_lexer::token::token_type::PAR_OPEN);
 
     //parse base types
-    std::vector<std::string> base_types;
+    std::set<std::string> base_types;
     
     while(!this->accept(type_lexer::token::token_type::PAR_CLOSE)) {
         if(!base_types.empty()) this->consume(type_lexer::token::token_type::SEPERATOR);
 
-        base_types.push_back(this->consume(type_lexer::token::token_type::IDENTIFIER).identifier);
+        base_types.insert(this->consume(type_lexer::token::token_type::IDENTIFIER).identifier);
     }
 
     this->consume(type_lexer::token::token_type::PAR_CLOSE);

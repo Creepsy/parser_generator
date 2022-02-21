@@ -31,14 +31,17 @@ int main() {
     type_lexer::type_lexer type_lex{type_input};
     type_parser::TypeParser type_pars{type_lex};
 
+    std::vector<type_parser::TypeDefinition> types;
+
     while(!type_pars.end()) {
-        std::cout << type_pars.parse_next_type() << "\n" << std::endl;
+        types.push_back(type_pars.parse_next_type());
+
+        std::cout << types.back() << "\n" << std::endl;
     }
 
-    // while(!lex.end()) {
-    //     token next = lex.next_unignored_token();
-    //     std::cout << next.type << ", " << next.identifier << std::endl;
-    // }
+    type_parser::TypeInfoTable type_infos = type_parser::construct_type_info_table(types);
+
+    std::cout << type_infos << std::endl;
    
     return 0;
 }
