@@ -8,7 +8,12 @@ std::ostream& rule_parser::operator<<(std::ostream& stream, const RuleResult& to
 
     for(int i = 0; i < to_write.arguments.size(); i++) {
         if(i != 0) stream << ", ";
-        stream << "$" << to_write.arguments[i].value_or(-1);
+        
+        if(to_write.arguments[i].has_value()) {
+            stream << "$" << to_write.arguments[i].value();
+        } else {
+            stream << "EMPTY";
+        }
     }
 
     return stream << ") -> " << to_write.type;
