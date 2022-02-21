@@ -8,8 +8,12 @@
 
 namespace rule_parser {
     struct RuleResult {
-        bool create_new; // if false, expects arguments to have at least one member
+        enum ResultType {
+            CREATE_NEW, // expects arguments to have at least one member (which is not of the type Token)
+            PASS_ARG
+        };
 
+        ResultType result_type;
         std::string type; 
         std::vector<std::optional<size_t>> arguments;
     };

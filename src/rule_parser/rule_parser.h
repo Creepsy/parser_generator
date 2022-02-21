@@ -10,6 +10,8 @@ namespace rule_parser {
             private:
                 std::vector<Parameter> parse_parameters();
                 RuleResult parse_rule_result();
+
+                RuleDefinition&& decorate_rule(RuleDefinition&& to_decorate);
             public:
                 RuleParser(rule_lexer::rule_lexer& lexer);
                 RuleDefinition parse_next_rule();

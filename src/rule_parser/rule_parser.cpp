@@ -20,7 +20,7 @@ RuleDefinition rule_parser::RuleParser::parse_next_rule() {
 
     this->consume(rule_lexer::token::EOL);
 
-    return RuleDefinition{is_entry, parameters, result};
+    return this->decorate_rule(RuleDefinition{is_entry, parameters, result});
 }
 
 rule_parser::RuleParser::~RuleParser() {
@@ -47,7 +47,7 @@ std::vector<Parameter> rule_parser::RuleParser::parse_parameters() {
 
 RuleResult rule_parser::RuleParser::parse_rule_result() {
     if(this->accept(rule_lexer::token::INDEX)) {
-        return RuleResult{false, "", std::vector<std::optional<size_t>>{std::stoull(this->consume().identifier.substr(1))}};
+        return RuleResult{RuleResult::PASS_ARG, "", std::vector<std::optional<size_t>>{std::stoull(this->consume().identifier.substr(1))}};
     }
 
     std::string type = this->consume(rule_lexer::token::IDENTIFIER).identifier;
@@ -68,5 +68,17 @@ RuleResult rule_parser::RuleParser::parse_rule_result() {
 
     this->consume(rule_lexer::token::PAR_CLOSE);
 
-    return RuleResult{true, type, arguments};
+    return RuleResult{RuleResult::CREATE_NEW, type, arguments};
+}
+
+RuleDefinition&& rule_parser::RuleParser::decorate_rule(RuleDefinition&& to_decorate) {
+    if(to_decorate.result.result_type == RuleResult::PASS_ARG && !to_decorate.result.arguments.empty()) {
+        size_t to_pass = to_decorate.result.arguments.begin()->value_or(-1);
+
+        if(to_pass < to_decorate.parameters.size() && !to_decorate.parameters[to_pass].is_token) {
+            to_decorate.result.type = to_decorate.parameters[to_pass].identifier;
+        }
+    }
+
+    return std::move(to_decorate);
 }

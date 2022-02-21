@@ -3,7 +3,7 @@
 using namespace rule_parser;
 
 std::ostream& rule_parser::operator<<(std::ostream& stream, const RuleResult& to_write) {
-    if(!to_write.create_new) return stream << "$" << to_write.arguments.begin()->value_or(-1);
+    if(to_write.result_type == RuleResult::PASS_ARG) return stream << "$" << to_write.arguments.begin()->value_or(-1) << " -> " << to_write.type;
     stream << to_write.type << "(";
 
     for(int i = 0; i < to_write.arguments.size(); i++) {
@@ -11,7 +11,7 @@ std::ostream& rule_parser::operator<<(std::ostream& stream, const RuleResult& to
         stream << "$" << to_write.arguments[i].value_or(-1);
     }
 
-    return stream << ")";
+    return stream << ") -> " << to_write.type;
 }
 
 std::ostream& rule_parser::operator<<(std::ostream& stream, const Parameter& to_write) {
