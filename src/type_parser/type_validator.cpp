@@ -34,6 +34,9 @@ void type_parser::validate_types(const std::vector<TypeDefinition>& to_validate)
 
         for(const std::string& base_type : type.base_types) update_type_map(valid_types, base_type, true);
     }
+
+    if(valid_types.contains("Token"))
+        throw std::runtime_error("The type 'Token' is a reserved type!");
 }
 
 void type_parser::validate_type(const TypeDefinition& to_validate, const TypeInfoTable& type_infos) {
