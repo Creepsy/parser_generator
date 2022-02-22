@@ -30,8 +30,13 @@ namespace rule_parser {
         std::vector<Parameter> parameters;
         RuleResult result;
     };
-    
+
     std::ostream& operator<<(std::ostream& stream, const RuleResult& to_write);
     std::ostream& operator<<(std::ostream& stream, const Parameter& to_write);
     std::ostream& operator<<(std::ostream& stream, const RuleDefinition& to_write);
+
+    //for sets
+    bool operator<(const RuleResult& first, const RuleResult& second);
+    bool operator<(const Parameter& first, const Parameter& second);
+    bool operator<(const RuleDefinition& first, const RuleDefinition& second);
 }
