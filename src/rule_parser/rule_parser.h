@@ -3,6 +3,7 @@
 #include <rule_lexer.h>
 
 #include "../util/parser_base.h"
+
 #include "rules.h"
 
 namespace rule_parser {

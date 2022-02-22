@@ -31,9 +31,8 @@ void validate_rule_result(const RuleDefinition& to_validate, const type_parser::
         if(return_type_info.parameters.size() != to_validate.result.arguments.size()) 
             throw std::runtime_error("Mismatched argument count!");
 
-        for(size_t arg = 0; arg < to_validate.result.arguments.size(); arg++) {
-            validate_result_argument(to_validate, arg, type_infos);
-        }
+        for(size_t arg = 0; arg < to_validate.result.arguments.size(); arg++) 
+            validate_result_argument(to_validate, arg, type_infos);   
     }
 }
 

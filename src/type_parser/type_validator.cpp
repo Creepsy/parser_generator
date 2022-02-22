@@ -11,9 +11,8 @@ void update_type_map(std::map<std::string, bool>& to_update, const std::string& 
 
 void update_type_map(std::map<std::string, bool>& to_update, const std::string& new_type, const bool is_base_type) {
     if(to_update.contains(new_type)) {
-        if(!is_base_type || to_update[new_type] != is_base_type) {
+        if(!is_base_type || to_update[new_type] != is_base_type) 
             throw std::runtime_error("Multiple definition of type '" + new_type + "'!");
-        }
     } 
 
     to_update.insert(std::make_pair(new_type, is_base_type));
@@ -32,7 +31,8 @@ void type_parser::validate_types(const std::vector<TypeDefinition>& to_validate)
 
         validate_type(type, type_infos);
 
-        for(const std::string& base_type : type.base_types) update_type_map(valid_types, base_type, true);
+        for(const std::string& base_type : type.base_types)
+            update_type_map(valid_types, base_type, true);
     }
 
     if(valid_types.contains("Token"))

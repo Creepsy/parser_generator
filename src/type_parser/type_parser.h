@@ -5,6 +5,7 @@
 #include <type_lexer.h>
 
 #include "../util/parser_base.h"
+
 #include "types.h"
 
 namespace type_parser {
