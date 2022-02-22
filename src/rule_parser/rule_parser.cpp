@@ -75,8 +75,12 @@ RuleDefinition&& rule_parser::RuleParser::decorate_rule(RuleDefinition&& to_deco
     if(to_decorate.result.result_type == RuleResult::PASS_ARG && !to_decorate.result.arguments.empty()) {
         size_t to_pass = to_decorate.result.arguments.begin()->value_or(-1);
 
-        if(to_pass < to_decorate.parameters.size() && !to_decorate.parameters[to_pass].is_token) {
-            to_decorate.result.type = to_decorate.parameters[to_pass].identifier;
+        if(to_pass < to_decorate.parameters.size()) {
+            if(to_decorate.parameters[to_pass].is_token) {
+                to_decorate.result.type = "Token";
+            } else {
+                to_decorate.result.type = to_decorate.parameters[to_pass].identifier;
+            }
         }
     }
 
