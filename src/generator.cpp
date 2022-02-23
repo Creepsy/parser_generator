@@ -7,6 +7,8 @@
 #include "rule_parser/rule_parser.h"
 #include "rule_parser/rule_validator.h"
 
+#include "generator/parser/states.h"
+
 int main() {
     std::ifstream rule_input{"../example_parser.rules"};
 
@@ -51,6 +53,15 @@ int main() {
     std::cout << type_infos << std::endl;
    
     rule_parser::validate_rules(rules, type_infos);
+
+    states::StartTokensTable start_tokens = states::construct_start_token_table(rules, type_infos);
+
+    for(const std::pair<std::string, std::set<rule_parser::Parameter>>& type : start_tokens) {
+        std::cout << type.first << ": ";
+        for(const rule_parser::Parameter& follow_up : type.second)
+            std::cout << follow_up << " ";
+        std::cout << std::endl;
+    }
 
     return 0;
 }

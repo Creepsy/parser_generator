@@ -1,0 +1,13 @@
+file(GLOB_RECURSE GENERATOR_HEADERS
+    "*.h"    
+)
+
+file(GLOB_RECURSE GENERATOR_SOURCES
+    "*.cpp"    
+)
+
+file(GLOB_RECURSE GENERATOR_INLINE_FILES
+    "*.ipp"    
+)
+
+add_library(generator_lib ${GENERATOR_HEADERS} ${GENERATOR_SOURCES} ${GENERATOR_INLINE_FILES})

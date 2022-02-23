@@ -1,6 +1,7 @@
 add_subdirectory(rule_parser)
 add_subdirectory(type_parser)
+add_subdirectory(generator)
 
 include_directories(${CMAKE_BINARY_DIR})
 add_executable(parser_generator generator.cpp)
-target_link_libraries(parser_generator rule_parser_lib type_parser_lib)
+target_link_libraries(parser_generator rule_parser_lib type_parser_lib generator_lib)
