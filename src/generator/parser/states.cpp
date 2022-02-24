@@ -16,10 +16,6 @@ states::RuleState::RuleState(const rule_parser::RuleDefinition& rule, const size
 
 }
 
-void states::RuleState::set_possible_lookaheads(const std::set<std::string>& tokens) {
-    this->possible_lookaheads = tokens;
-}
-
 std::optional<RuleState> states::RuleState::advance(const rule_parser::Parameter& to_expect) const {
     return (this->curr() == to_expect) ? std::optional<RuleState>(RuleState(this->rule, this->position + 1, this->possible_lookaheads)) : std::nullopt;
 }
@@ -36,11 +32,33 @@ std::optional<rule_parser::Parameter> states::RuleState::lookahead() const {
     return this->get(this->position + 1);
 }
 
+const rule_parser::RuleDefinition& states::RuleState::get_rule() const {
+    return this->rule;
+}
+
+const std::set<std::string> states::RuleState::get_possible_lookaheads() const {
+    return this->possible_lookaheads;
+}
+
 bool states::RuleState::end() const {
     return this->position >= this->rule.parameters.size();
 }
 
 states::RuleState::~RuleState() {
+}
+
+
+
+State states::State::advance(const rule_parser::Parameter& to_expect) const {
+    State new_state;
+
+    for(const RuleState& rule : this->rule_possibilities) {
+        std::optional<RuleState> advanced_rule = rule.advance(to_expect);
+        if(advanced_rule.has_value())
+            new_state.rule_possibilities.insert(advanced_rule.value());
+    }
+
+    return new_state;
 }
 
 
@@ -95,7 +113,7 @@ std::set<std::string> states::get_start_tokens(const std::string& type, const St
     return start_tokens;
 }
 
-std::set<std::string> states::get_follow_up_tokens(const State& state, const std::string& type, const StartTokensTable& start_table, const type_parser::TypeInfoTable& type_infos) {
+std::set<std::string> states::get_lookahead_tokens(const State& state, const std::string& type, const StartTokensTable& start_table, const type_parser::TypeInfoTable& type_infos) {
     std::set<std::string> follow_up_tokens;
 
     for(const RuleState& rule : state.rule_possibilities) {
@@ -118,10 +136,65 @@ std::set<std::string> states::get_follow_up_tokens(const State& state, const std
 
 
 
+std::ostream& states::operator<<(std::ostream& stream, const RuleState& to_write) {
+    if(to_write.get_rule().is_entry) stream << "* ";
+    
+    for(size_t pos = 0; pos < to_write.get_rule().parameters.size(); pos++) {
+        if(pos == to_write.position)
+            stream << "|";
+        stream << to_write.get_rule().parameters.at(pos) << " ";
+    }
+
+    return stream << ": " << to_write.get_rule().result << ";";
+}
+
+std::ostream& states::operator<<(std::ostream& stream, const Action& to_write) {
+    const static std::vector<std::string> ACTION_TYPE_STRINGS = {"SHIFT", "GOTO", "REDUCE", "ACCEPT"};
+
+    stream << ACTION_TYPE_STRINGS[to_write.type] << " ";
+    
+    std::visit([&](const auto& to_print) -> void { stream << to_print; }, to_write.operand);
+
+    stream << " on ";
+
+    for(const std::string& lookahead : to_write.possible_lookaheads)
+        stream << lookahead << " ";
+
+    return stream;
+}
+
+std::ostream& states::operator<<(std::ostream& stream, const State& to_write) {
+    stream << "State:\n\tRules:\n";
+
+    for(const RuleState& rule : to_write.rule_possibilities)
+        stream << "\t\t" << rule << "\n";
+
+    stream << "\tActions:\n";
+
+    for(const Action& action : to_write.actions) 
+        stream << "\t\t" << action << "\n";
+
+    return stream;
+}
+
+
+
 bool states::operator<(const RuleState& first, const RuleState& second) {
     return comparators::smaller_lex_comparator(
         std::make_pair(first.rule, second.rule),
         std::make_pair(first.position, second.position),
         std::make_pair(first.possible_lookaheads, second.possible_lookaheads)
     );
+}
+
+bool states::operator<(const Action& first, const Action& second) {
+    return comparators::smaller_lex_comparator(
+        std::make_pair(first.type, second.type),
+        std::make_pair(first.operand, second.operand),
+        std::make_pair(first.possible_lookaheads, second.possible_lookaheads)  
+    );
+}
+
+bool states::operator<(const State& first, const State& second) {
+    return first.rule_possibilities < second.rule_possibilities;
 }
