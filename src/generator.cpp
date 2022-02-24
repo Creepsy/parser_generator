@@ -1,5 +1,7 @@
 #include <iostream>
 #include <fstream>
+#include <algorithm>
+#include <iterator>
 
 #include "type_parser/type_parser.h"
 #include "type_parser/type_validator.h"
@@ -54,12 +56,23 @@ int main() {
    
     rule_parser::validate_rules(rules, type_infos);
 
-    states::StartTokensTable start_tokens = states::construct_start_token_table(rules, type_infos);
+    states::StartTokensTable start_table = states::construct_start_token_table(rules, type_infos);
 
-    for(const std::pair<std::string, std::set<rule_parser::Parameter>>& type : start_tokens) {
-        std::cout << type.first << ": ";
-        for(const rule_parser::Parameter& follow_up : type.second)
+    states::State test_state;
+
+    std::transform(rules.begin(), rules.end(), std::inserter(test_state.rule_possibilities, test_state.rule_possibilities.end()), 
+        [](const rule_parser::RuleDefinition& rule) -> states::RuleState { return states::RuleState(rule); }
+    );
+
+    for(const std::pair<std::string, std::set<rule_parser::Parameter>>& type : start_table) {
+        std::cout << type.first << ": \n\tStart: ";
+        for(const std::string& follow_up : states::get_start_tokens(type.first, start_table))
             std::cout << follow_up << " ";
+
+        std::cout << "\n\tFollow-Up: ";
+        for(const std::string& follow_up : states::get_follow_up_tokens(test_state, type.first, start_table, type_infos))
+            std::cout << follow_up << " ";
+
         std::cout << std::endl;
     }
 
