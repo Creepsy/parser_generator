@@ -36,7 +36,7 @@ const rule_parser::RuleDefinition& states::RuleState::get_rule() const {
     return this->rule;
 }
 
-const std::set<std::string> states::RuleState::get_possible_lookaheads() const {
+const std::set<std::string>& states::RuleState::get_possible_lookaheads() const {
     return this->possible_lookaheads;
 }
 
@@ -120,12 +120,16 @@ std::set<std::string> states::get_lookahead_tokens(const State& state, const std
         std::optional<rule_parser::Parameter> curr = rule.curr();
         std::optional<rule_parser::Parameter> follow_up = rule.lookahead();
 
-        if(curr.has_value() && follow_up.has_value()) {
+        if(curr.has_value()) {
             if(!curr.value().is_token && type_parser::is_convertible(type, curr.value().identifier, type_infos)) {
-                if(follow_up.value().is_token) {
-                    follow_up_tokens.insert(follow_up.value().identifier);
+                if(follow_up.has_value()) {
+                    if(follow_up.value().is_token) {
+                        follow_up_tokens.insert(follow_up.value().identifier);
+                    } else {
+                        follow_up_tokens.merge(get_start_tokens(follow_up.value().identifier, start_table));
+                    }
                 } else {
-                    follow_up_tokens.merge(get_start_tokens(follow_up.value().identifier, start_table));
+                    std::copy(rule.get_possible_lookaheads().begin(), rule.get_possible_lookaheads().end(), std::inserter(follow_up_tokens, follow_up_tokens.end()));
                 }
             }
         }
@@ -137,6 +141,11 @@ std::set<std::string> states::get_lookahead_tokens(const State& state, const std
 
 
 std::ostream& states::operator<<(std::ostream& stream, const RuleState& to_write) {
+    stream << "<<<";
+    for(const std::string& lookahead : to_write.get_possible_lookaheads()) 
+        stream << lookahead << " ";
+
+    stream << ">>> ";
     if(to_write.get_rule().is_entry) stream << "* ";
     
     for(size_t pos = 0; pos < to_write.get_rule().parameters.size(); pos++) {
@@ -144,6 +153,9 @@ std::ostream& states::operator<<(std::ostream& stream, const RuleState& to_write
             stream << "|";
         stream << to_write.get_rule().parameters.at(pos) << " ";
     }
+
+    if(to_write.end())
+        stream << "|";
 
     return stream << ": " << to_write.get_rule().result << ";";
 }
