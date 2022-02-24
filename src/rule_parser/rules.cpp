@@ -38,6 +38,10 @@ std::ostream& rule_parser::operator<<(std::ostream& stream, const RuleDefinition
     return stream << ": " << to_write.result << ";";
 }
 
+bool rule_parser::operator==(const Parameter& first, const Parameter& second) {
+    return first.is_token == second.is_token && first.identifier == second.identifier;
+}
+
 bool rule_parser::operator<(const RuleResult& first, const RuleResult& second) {
     return comparators::smaller_lex_comparator(
         std::make_pair(first.result_type, second.result_type),

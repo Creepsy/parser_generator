@@ -35,6 +35,8 @@ namespace rule_parser {
     std::ostream& operator<<(std::ostream& stream, const Parameter& to_write);
     std::ostream& operator<<(std::ostream& stream, const RuleDefinition& to_write);
 
+    bool operator==(const Parameter& first, const Parameter& second);
+
     //for sets
     bool operator<(const RuleResult& first, const RuleResult& second);
     bool operator<(const Parameter& first, const Parameter& second);
