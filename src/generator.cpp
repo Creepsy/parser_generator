@@ -10,6 +10,7 @@
 #include "rule_parser/rule_validator.h"
 
 #include "generator/parser/states.h"
+#include "generator/parser/parser_generator.h"
 
 int main() {
     std::ifstream rule_input{"../example_parser.rules"};
@@ -26,7 +27,6 @@ int main() {
 
     while(!rule_pars.end()) {
         rules.push_back(rule_pars.parse_next_rule());
-        std::cout << rules.back() << std::endl;
     }
 
     std::cout << std::endl;
@@ -45,36 +45,22 @@ int main() {
 
     while(!type_pars.end()) {
         types.push_back(type_pars.parse_next_type());
-
-        std::cout << types.back() << "\n" << std::endl;
     }
 
     type_parser::validate_types(types);
     type_parser::TypeInfoTable type_infos = type_parser::construct_type_info_table(types);
 
-    std::cout << type_infos << std::endl;
    
     rule_parser::validate_rules(rules, type_infos);
-
     states::StartTokensTable start_table = states::construct_start_token_table(rules, type_infos);
 
-    states::State test_state;
+    std::map<states::State, size_t> parser_states = parser_generator::generate_parser_states(rules, type_infos, start_table);
 
-    std::transform(rules.begin(), rules.end(), std::inserter(test_state.rule_possibilities, test_state.rule_possibilities.end()), 
-        [](const rule_parser::RuleDefinition& rule) -> states::RuleState { return states::RuleState(rule); }
-    );
-
-    for(const std::pair<std::string, std::set<rule_parser::Parameter>>& type : start_table) {
-        std::cout << type.first << ": \n\tStart: ";
-        for(const std::string& follow_up : states::get_start_tokens(type.first, start_table))
-            std::cout << follow_up << " ";
-
-        std::cout << "\n\tFollow-Up: ";
-        for(const std::string& follow_up : states::get_follow_up_tokens(test_state, type.first, start_table, type_infos))
-            std::cout << follow_up << " ";
-
-        std::cout << std::endl;
+    for(const std::pair<states::State, size_t>& state : parser_states) {
+        std::cout << state.second << ". " << state.first;
     }
+
+    std::cout << std::endl;
 
     return 0;
 }
