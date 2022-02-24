@@ -37,10 +37,6 @@ void validate_rule_result(const RuleDefinition& to_validate, const type_parser::
 }
 
 void validate_result_argument(const RuleDefinition& to_validate, const size_t arg, const type_parser::TypeInfoTable& type_infos) {
-    constexpr auto invalid_type_err = [](const std::string& found, const std::string& expected) -> void {
-        throw std::runtime_error("Expected type '" + expected + ", found '" + found + "'!");
-    };
-
     const type_parser::TypeInfo& return_type_info = type_infos.at(to_validate.result.type);
     const std::optional<size_t>& index = to_validate.result.arguments[arg];
 
@@ -51,21 +47,8 @@ void validate_result_argument(const RuleDefinition& to_validate, const size_t ar
         const std::string& expected_type = return_type_info.parameters.at(arg).second;
         const std::string& actual_type = (to_validate.parameters[index.value()].is_token) ? "Token" : to_validate.parameters[index.value()].identifier;
 
-        if(actual_type != expected_type) {
-            if(actual_type == "Token" || expected_type == "Token")
-                invalid_type_err(actual_type, expected_type);
-
-            if(type_infos.at(actual_type).is_base && type_infos.at(expected_type).is_base) {
-                const std::set<std::string>& expected_types = type_infos.at(expected_type).possible_types;
-                const std::set<std::string>& actual_types = type_infos.at(actual_type).possible_types;
-
-                if(!std::includes(expected_types.begin(), expected_types.end(), actual_types.begin(), actual_types.end()))
-                    invalid_type_err(actual_type, expected_type);
-            } else {
-                if(!type_infos.at(expected_type).possible_types.contains(actual_type))
-                    invalid_type_err(actual_type, expected_type);
-            }                   
-        }
+        if(!type_parser::is_convertible(actual_type, expected_type, type_infos))
+            throw std::runtime_error("Expected type '" + expected_type + ", found '" + actual_type + "'!");
     }   
 }
 

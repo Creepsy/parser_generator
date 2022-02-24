@@ -31,4 +31,6 @@ namespace type_parser {
     std::ostream& operator<<(std::ostream& stream, const TypeDefinition& to_write);
     std::ostream& operator<<(std::ostream& stream, const TypeInfo& to_write);
     std::ostream& operator<<(std::ostream& stream, const TypeInfoTable& to_write);
+
+    bool is_convertible(const std::string& from, const std::string& to, const TypeInfoTable& type_infos);
 }
