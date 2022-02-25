@@ -29,7 +29,9 @@ int main() {
         rules.push_back(rule_pars.parse_next_rule());
     }
 
-    std::cout << std::endl;
+    rule_input.close();
+
+
 
     std::ifstream type_input{"../example_parser.types"};
 
@@ -47,20 +49,23 @@ int main() {
         types.push_back(type_pars.parse_next_type());
     }
 
+    type_input.close();
+
+
+
     type_parser::validate_types(types);
     type_parser::TypeInfoTable type_infos = type_parser::construct_type_info_table(types);
 
-   
     rule_parser::validate_rules(rules, type_infos);
     states::StartTokensTable start_table = states::construct_start_token_table(rules, type_infos);
 
-    std::map<states::State, size_t> parser_states = parser_generator::generate_parser_states(rules, type_infos, start_table);
+    parser_generator::ParserInfo parser_info = parser_generator::generate_parser_states(rules, type_infos, start_table);
 
-    for(const std::pair<states::State, size_t>& state : parser_states) {
+    for(const std::pair<states::State, size_t>& state : parser_info.parser_states) {
         std::cout << state.second << ". " << state.first;
     }
 
-    std::cout << std::endl;
+    std::cout << "\nStart-State: " << parser_info.start_state << std::endl;
 
     return 0;
 }

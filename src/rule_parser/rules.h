@@ -37,7 +37,7 @@ namespace rule_parser {
 
     bool operator==(const Parameter& first, const Parameter& second);
 
-    //for sets
+    //for std-containers
     bool operator<(const RuleResult& first, const RuleResult& second);
     bool operator<(const Parameter& first, const Parameter& second);
     bool operator<(const RuleDefinition& first, const RuleDefinition& second);

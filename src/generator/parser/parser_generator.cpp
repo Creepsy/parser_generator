@@ -5,18 +5,13 @@
 
 using namespace parser_generator;
 
-states::State parser_generator::create_start_state(const std::vector<rule_parser::RuleDefinition>& rules) {
-    states::State start_state;
+//helper functions
+void complete_rules(states::State& to_process, const std::vector<rule_parser::RuleDefinition>& rules,
+        const type_parser::TypeInfoTable& type_infos, const states::StartTokensTable& start_table);
+void generate_actions(states::State& to_process, std::map<states::State, size_t>& processed, const std::vector<rule_parser::RuleDefinition>& rules,
+        const type_parser::TypeInfoTable& type_infos, const states::StartTokensTable& start_table);
 
-    for(const rule_parser::RuleDefinition& rule : rules) {
-        if(rule.is_entry)
-            start_state.rule_possibilities.insert(states::RuleState(rule));
-    }
-
-    return start_state;
-}
-
-size_t parser_generator::process_state(states::State to_process, std::map<states::State, size_t>& processed, const std::vector<rule_parser::RuleDefinition>& rules,
+void complete_rules(states::State& to_process, const std::vector<rule_parser::RuleDefinition>& rules,
         const type_parser::TypeInfoTable& type_infos, const states::StartTokensTable& start_table) {
     std::set<rule_parser::RuleDefinition> rules_to_add;
 
@@ -33,12 +28,10 @@ size_t parser_generator::process_state(states::State to_process, std::map<states
         to_process.rule_possibilities.erase(states::RuleState(added_rule));
         to_process.rule_possibilities.insert(states::RuleState(added_rule, 0, lookahead_tokens));
     }
+}
 
-    //state already exists
-    if(processed.contains(to_process)) {
-        return processed[to_process];
-    }
-
+void generate_actions(states::State& to_process, std::map<states::State, size_t>& processed, const std::vector<rule_parser::RuleDefinition>& rules,
+        const type_parser::TypeInfoTable& type_infos, const states::StartTokensTable& start_table) {
     std::set<rule_parser::Parameter> processed_parameters;
     for(const states::RuleState& rule : to_process.rule_possibilities) {
         if(rule.curr().has_value()) {
@@ -61,6 +54,31 @@ size_t parser_generator::process_state(states::State to_process, std::map<states
             });
         }
     }
+}
+
+
+
+states::State parser_generator::create_start_state(const std::vector<rule_parser::RuleDefinition>& rules) {
+    states::State start_state;
+
+    for(const rule_parser::RuleDefinition& rule : rules) {
+        if(rule.is_entry)
+            start_state.rule_possibilities.insert(states::RuleState(rule));
+    }
+
+    return start_state;
+}
+
+size_t parser_generator::process_state(states::State to_process, std::map<states::State, size_t>& processed, const std::vector<rule_parser::RuleDefinition>& rules,
+        const type_parser::TypeInfoTable& type_infos, const states::StartTokensTable& start_table) {
+    complete_rules(to_process, rules, type_infos, start_table);
+
+    //state already exists
+    if(processed.contains(to_process)) {
+        return processed[to_process];
+    }
+
+    generate_actions(to_process, processed, rules, type_infos, start_table);
 
     processed.insert(std::make_pair(to_process, processed.size()));
 
@@ -94,10 +112,10 @@ std::set<rule_parser::RuleDefinition> parser_generator::get_sub_rules(const std:
     return sub_rules;
 }
 
-std::map<states::State, size_t> parser_generator::generate_parser_states(const std::vector<rule_parser::RuleDefinition>& rules,
+ParserInfo parser_generator::generate_parser_states(const std::vector<rule_parser::RuleDefinition>& rules,
         const type_parser::TypeInfoTable& type_infos, const states::StartTokensTable& start_table) {
     std::map<states::State, size_t> parser_states;
-    process_state(create_start_state(rules), parser_states, rules, type_infos, start_table);
+    size_t start_state = process_state(create_start_state(rules), parser_states, rules, type_infos, start_table);
 
-    return parser_states;
+    return ParserInfo{parser_states, start_state};
 }
