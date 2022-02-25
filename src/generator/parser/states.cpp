@@ -16,8 +16,17 @@ states::RuleState::RuleState(const rule_parser::RuleDefinition& rule, const size
 
 }
 
-std::optional<RuleState> states::RuleState::advance(const rule_parser::Parameter& to_expect) const {
-    return (this->curr() == to_expect) ? std::optional<RuleState>(RuleState(this->rule, this->position + 1, this->possible_lookaheads)) : std::nullopt;
+std::optional<RuleState> states::RuleState::advance(const rule_parser::Parameter& to_expect, const type_parser::TypeInfoTable& type_infos) const {
+    if(this->end()) 
+        return std::nullopt;
+
+    std::string from = (to_expect.is_token) ? "Token" : to_expect.identifier;
+    std::string to = (this->curr().value().is_token) ? "Token" : this->curr().value().identifier;
+
+    if(from == "Token" && to == "Token" && to_expect.identifier != this->curr().value().identifier)
+        return std::nullopt;
+
+    return (type_parser::is_convertible(from, to, type_infos)) ? std::optional<RuleState>(RuleState(this->rule, this->position + 1, this->possible_lookaheads)) : std::nullopt;
 }
 
 std::optional<rule_parser::Parameter> states::RuleState::get(const size_t position) const {
@@ -41,7 +50,7 @@ const std::set<std::string>& states::RuleState::get_possible_lookaheads() const 
 }
 
 bool states::RuleState::end() const {
-    return this->position >= this->rule.parameters.size();
+    return !this->curr().has_value();
 }
 
 states::RuleState::~RuleState() {
@@ -49,11 +58,11 @@ states::RuleState::~RuleState() {
 
 
 
-State states::State::advance(const rule_parser::Parameter& to_expect) const {
+State states::State::advance(const rule_parser::Parameter& to_expect, const type_parser::TypeInfoTable& type_infos) const {
     State new_state;
 
     for(const RuleState& rule : this->rule_possibilities) {
-        std::optional<RuleState> advanced_rule = rule.advance(to_expect);
+        std::optional<RuleState> advanced_rule = rule.advance(to_expect, type_infos);
         if(advanced_rule.has_value())
             new_state.rule_possibilities.insert(advanced_rule.value());
     }
