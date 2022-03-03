@@ -41,10 +41,10 @@ void validate_result_argument(const RuleDefinition& to_validate, const size_t ar
     const std::optional<size_t>& index = to_validate.result.arguments[arg];
 
     if(!index.has_value()) {
-        if(return_type_info.parameters.at(arg).second == "Token") 
+        if(return_type_info.parameters.at(arg).type == "Token") 
             throw std::runtime_error("Tokens can't be default constructed!");
     } else {
-        const std::string& expected_type = return_type_info.parameters.at(arg).second;
+        const std::string& expected_type = return_type_info.parameters.at(arg).type;
         const std::string& actual_type = (to_validate.parameters[index.value()].is_token) ? "Token" : to_validate.parameters[index.value()].identifier;
 
         if(!type_parser::is_convertible(actual_type, expected_type, type_infos))

@@ -36,7 +36,7 @@ TypeDefinition TypeParser::parse_next_type() {
 
         std::string name = this->consume(type_lexer::token::token_type::IDENTIFIER).identifier;
         this->consume(type_lexer::token::token_type::ASSIGN);
-        parameters.push_back(std::make_pair(name, this->consume(type_lexer::token::token_type::IDENTIFIER).identifier));
+        parameters.push_back(Parameter{name, this->consume(type_lexer::token::token_type::IDENTIFIER).identifier});
     }
 
     this->consume(type_lexer::token::token_type::EOL);

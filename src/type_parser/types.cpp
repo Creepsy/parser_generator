@@ -8,8 +8,11 @@ using namespace type_parser;
 std::ostream& write_parameters(std::ostream& stream, const std::vector<Parameter>& to_write, const size_t indentation_level = 1);
 
 std::ostream& write_parameters(std::ostream& stream, const std::vector<Parameter>& to_write, const size_t indentation_level) {
-    for(const Parameter& par : to_write) 
-        stream << std::string(indentation_level, '\t') << par.first << " : " << par.second << "\n";
+    for(const Parameter& par : to_write) {
+        stream << std::string(indentation_level, '\t') << par.identifier << " : " << par.type;
+        if(par.is_vector) stream << "[]";
+        stream << "\n";
+    }
 
     return stream;
 }

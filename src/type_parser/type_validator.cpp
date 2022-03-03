@@ -41,6 +41,6 @@ void type_parser::validate_types(const std::vector<TypeDefinition>& to_validate)
 
 void type_parser::validate_type(const TypeDefinition& to_validate, const TypeInfoTable& type_infos) {
     for(const Parameter& par : to_validate.parameters) {
-        if(par.second != "Token" && !type_infos.contains(par.second)) throw std::runtime_error("Use of unknown type '" + par.second + "'!");
+        if(par.type != "Token" && !type_infos.contains(par.type)) throw std::runtime_error("Use of unknown type '" + par.type + "'!");
     }
 }

@@ -8,8 +8,12 @@
 #include <set>
 
 namespace type_parser {
-    //identifier, type string
-    typedef std::pair<std::string, std::string> Parameter;
+    struct Parameter {
+        std::string identifier;
+        std::string type;
+
+        bool is_vector;
+    };
 
     struct TypeDefinition {
         std::string identifier;
