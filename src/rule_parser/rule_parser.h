@@ -9,7 +9,7 @@
 namespace rule_parser {
         class RuleParser : public ParserBase<rule_lexer::rule_lexer, rule_lexer::token> {
             private:
-                std::vector<Parameter> parse_parameters();
+                std::vector<Argument> parse_arguments();
                 RuleResult parse_rule_result();
 
                 RuleDefinition&& decorate_rule(RuleDefinition&& to_decorate);

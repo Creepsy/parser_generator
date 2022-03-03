@@ -16,7 +16,7 @@
 
 namespace states {
     //Key: TypeName, Value: possible start tokens
-    typedef std::map<std::string, std::set<rule_parser::Parameter>> StartTokensTable;
+    typedef std::map<std::string, std::set<rule_parser::Argument>> StartTokensTable;
 
     class RuleState {
         private:
@@ -27,10 +27,10 @@ namespace states {
         public:
             explicit RuleState(const rule_parser::RuleDefinition& rule);
             RuleState(const rule_parser::RuleDefinition& rule, const size_t position, const std::set<std::string>& possible_lookaheads);
-            std::optional<RuleState> advance(const rule_parser::Parameter& to_expect, const type_parser::TypeInfoTable& type_infos) const;
-            std::optional<rule_parser::Parameter> get(const size_t position) const;
-            std::optional<rule_parser::Parameter> curr() const;
-            std::optional<rule_parser::Parameter> lookahead() const;
+            std::optional<RuleState> advance(const rule_parser::Argument& to_expect, const type_parser::TypeInfoTable& type_infos) const;
+            std::optional<rule_parser::Argument> get(const size_t position) const;
+            std::optional<rule_parser::Argument> curr() const;
+            std::optional<rule_parser::Argument> lookahead() const;
             const rule_parser::RuleDefinition& get_rule() const;
             const std::set<std::string>& get_possible_lookaheads() const;
             bool end() const;
@@ -57,7 +57,7 @@ namespace states {
         std::set<RuleState> rule_possibilities;
         std::set<Action> actions;
 
-        State advance(const rule_parser::Parameter& to_expect, const type_parser::TypeInfoTable& type_infos) const;
+        State advance(const rule_parser::Argument& to_expect, const type_parser::TypeInfoTable& type_infos) const;
     };
     
     StartTokensTable construct_start_token_table(const std::vector<rule_parser::RuleDefinition>& rules, const type_parser::TypeInfoTable& type_infos);

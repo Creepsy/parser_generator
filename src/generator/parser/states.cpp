@@ -16,7 +16,7 @@ states::RuleState::RuleState(const rule_parser::RuleDefinition& rule, const size
 
 }
 
-std::optional<RuleState> states::RuleState::advance(const rule_parser::Parameter& to_expect, const type_parser::TypeInfoTable& type_infos) const {
+std::optional<RuleState> states::RuleState::advance(const rule_parser::Argument& to_expect, const type_parser::TypeInfoTable& type_infos) const {
     if(this->end()) 
         return std::nullopt;
 
@@ -29,15 +29,15 @@ std::optional<RuleState> states::RuleState::advance(const rule_parser::Parameter
     return (type_parser::is_convertible(from, to, type_infos)) ? std::optional<RuleState>(RuleState(this->rule, this->position + 1, this->possible_lookaheads)) : std::nullopt;
 }
 
-std::optional<rule_parser::Parameter> states::RuleState::get(const size_t position) const {
-    return (position >= this->rule.parameters.size()) ? std::nullopt : std::optional<rule_parser::Parameter>(this->rule.parameters.at(position));
+std::optional<rule_parser::Argument> states::RuleState::get(const size_t position) const {
+    return (position >= this->rule.arguments.size()) ? std::nullopt : std::optional<rule_parser::Argument>(this->rule.arguments.at(position));
 }
 
-std::optional<rule_parser::Parameter> states::RuleState::curr() const {
+std::optional<rule_parser::Argument> states::RuleState::curr() const {
     return this->get(this->position);
 }
 
-std::optional<rule_parser::Parameter> states::RuleState::lookahead() const {
+std::optional<rule_parser::Argument> states::RuleState::lookahead() const {
     return this->get(this->position + 1);
 }
 
@@ -58,7 +58,7 @@ states::RuleState::~RuleState() {
 
 
 
-State states::State::advance(const rule_parser::Parameter& to_expect, const type_parser::TypeInfoTable& type_infos) const {
+State states::State::advance(const rule_parser::Argument& to_expect, const type_parser::TypeInfoTable& type_infos) const {
     State new_state;
 
     for(const RuleState& rule : this->rule_possibilities) {
@@ -76,11 +76,11 @@ StartTokensTable states::construct_start_token_table(const std::vector<rule_pars
     StartTokensTable start_table;
     
     for(const std::pair<std::string, type_parser::TypeInfo>& type_info : type_infos)
-        start_table.insert(std::make_pair(type_info.first, std::set<rule_parser::Parameter>{}));
+        start_table.insert(std::make_pair(type_info.first, std::set<rule_parser::Argument>{}));
 
     for(const rule_parser::RuleDefinition& rule : rules) {
-        if(!rule.parameters.empty() && !rule.is_entry) 
-            start_table[rule.result.type].insert(rule.parameters.front()); 
+        if(!rule.arguments.empty() && !rule.is_entry) 
+            start_table[rule.result.type].insert(rule.arguments.front()); 
     }   
 
     for(const std::pair<std::string, type_parser::TypeInfo>& type_info : type_infos) {
@@ -109,7 +109,7 @@ std::set<std::string> states::get_start_tokens(const std::string& type, const St
 
     visited_types.insert(type);
 
-    for(const rule_parser::Parameter& possible_start : start_table.at(type)) {
+    for(const rule_parser::Argument& possible_start : start_table.at(type)) {
         if(possible_start.is_token) {
             start_tokens.insert(possible_start.identifier);
         } else {
@@ -126,8 +126,8 @@ std::set<std::string> states::get_lookahead_tokens(const State& state, const std
     std::set<std::string> follow_up_tokens;
 
     for(const RuleState& rule : state.rule_possibilities) {
-        std::optional<rule_parser::Parameter> curr = rule.curr();
-        std::optional<rule_parser::Parameter> follow_up = rule.lookahead();
+        std::optional<rule_parser::Argument> curr = rule.curr();
+        std::optional<rule_parser::Argument> follow_up = rule.lookahead();
 
         if(curr.has_value()) {
             if(!curr.value().is_token && type_parser::is_convertible(type, curr.value().identifier, type_infos)) {
@@ -157,10 +157,10 @@ std::ostream& states::operator<<(std::ostream& stream, const RuleState& to_write
     stream << ">>> ";
     if(to_write.get_rule().is_entry) stream << "* ";
     
-    for(size_t pos = 0; pos < to_write.get_rule().parameters.size(); pos++) {
+    for(size_t pos = 0; pos < to_write.get_rule().arguments.size(); pos++) {
         if(pos == to_write.position)
             stream << "|";
-        stream << to_write.get_rule().parameters.at(pos) << " ";
+        stream << to_write.get_rule().arguments.at(pos) << " ";
     }
 
     if(to_write.end())
