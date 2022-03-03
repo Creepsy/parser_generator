@@ -26,7 +26,12 @@ std::ostream& rule_parser::operator<<(std::ostream& stream, const RuleResult& to
 }
 
 std::ostream& rule_parser::operator<<(std::ostream& stream, const Argument& to_write) {
-    return stream << ((to_write.is_token) ? ("<" + to_write.identifier + ">") : to_write.identifier);
+    stream << ((to_write.is_token) ? ("<" + to_write.identifier + ">") : to_write.identifier);
+
+    if(to_write.is_vector)
+        stream << "[]";
+
+    return stream;
 }
 
 std::ostream& rule_parser::operator<<(std::ostream& stream, const RuleDefinition& to_write) {
@@ -39,7 +44,7 @@ std::ostream& rule_parser::operator<<(std::ostream& stream, const RuleDefinition
 }
 
 bool rule_parser::operator==(const Argument& first, const Argument& second) {
-    return first.is_token == second.is_token && first.identifier == second.identifier;
+    return first.is_token == second.is_token && first.is_vector == second.is_vector && first.identifier == second.identifier;
 }
 
 bool rule_parser::operator<(const RuleResult& first, const RuleResult& second) {

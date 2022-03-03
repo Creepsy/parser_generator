@@ -7,6 +7,13 @@
 #include <optional>
 
 namespace rule_parser {
+    struct Argument {
+        bool is_token;
+        bool is_vector;
+
+        std::string identifier;
+    };
+
     struct RuleResult {
         enum ResultType {
             CREATE_NEW, // expects arguments to have at least one member (which is not of the type Token)
@@ -14,15 +21,8 @@ namespace rule_parser {
         };
 
         ResultType result_type;
-        std::string type; 
+        Argument type; 
         std::vector<std::optional<size_t>> argument_ids;
-    };
-
-    struct Argument {
-        bool is_token;
-        bool is_vector;
-
-        std::string identifier;
     };
 
     struct RuleDefinition {

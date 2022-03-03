@@ -5,6 +5,7 @@ EMPTY EMPTY
 PAR_OPEN \(
 PAR_CLOSE \)
 EOL ;
+VECTOR \[\]
 ASSIGN \:
 SEPERATOR \,
 TOKEN <[a-zA-Z_]\w*>

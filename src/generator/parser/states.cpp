@@ -80,7 +80,7 @@ StartTokensTable states::construct_start_token_table(const std::vector<rule_pars
 
     for(const rule_parser::RuleDefinition& rule : rules) {
         if(!rule.arguments.empty() && !rule.is_entry) 
-            start_table[rule.result.type].insert(rule.arguments.front()); 
+            start_table[rule.result.type.identifier].insert(rule.arguments.front()); 
     }   
 
     for(const std::pair<std::string, type_parser::TypeInfo>& type_info : type_infos) {

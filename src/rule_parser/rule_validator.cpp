@@ -13,17 +13,17 @@ void validate_rule_result(const RuleDefinition& to_validate, const type_parser::
 void validate_result_argument(const RuleDefinition& to_validate, const size_t arg, const type_parser::TypeInfoTable& type_infos);
 
 void validate_rule_result(const RuleDefinition& to_validate, const type_parser::TypeInfoTable& type_infos) {
-    if(to_validate.result.type.empty())
+    if(to_validate.result.type.identifier.empty())
         throw std::runtime_error("The rule is missing a return type!");
 
-    if(to_validate.result.type == "Token") 
+    if(to_validate.result.type.identifier == "Token") 
         throw std::runtime_error("The result of a rule can't be a token!");
 
-    if(!type_infos.contains(to_validate.result.type))
-        throw std::runtime_error("The type '" + to_validate.result.type + "' doesn't exist!");
+    if(!type_infos.contains(to_validate.result.type.identifier))
+        throw std::runtime_error("The type '" + to_validate.result.type.identifier + "' doesn't exist!");
 
     if(to_validate.result.result_type == RuleResult::CREATE_NEW) {
-        const type_parser::TypeInfo& return_type_info = type_infos.at(to_validate.result.type);
+        const type_parser::TypeInfo& return_type_info = type_infos.at(to_validate.result.type.identifier);
 
         if(return_type_info.is_base) 
             throw std::runtime_error("Base types can't be constructed!");
@@ -37,7 +37,7 @@ void validate_rule_result(const RuleDefinition& to_validate, const type_parser::
 }
 
 void validate_result_argument(const RuleDefinition& to_validate, const size_t arg, const type_parser::TypeInfoTable& type_infos) {
-    const type_parser::TypeInfo& return_type_info = type_infos.at(to_validate.result.type);
+    const type_parser::TypeInfo& return_type_info = type_infos.at(to_validate.result.type.identifier);
     const std::optional<size_t>& index = to_validate.result.argument_ids[arg];
 
     if(!index.has_value()) {
