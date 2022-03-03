@@ -34,9 +34,7 @@ TypeDefinition TypeParser::parse_next_type() {
         if(!parameters.empty()) 
             this->consume(type_lexer::token::token_type::SEPERATOR);
 
-        std::string name = this->consume(type_lexer::token::token_type::IDENTIFIER).identifier;
-        this->consume(type_lexer::token::token_type::ASSIGN);
-        parameters.push_back(Parameter{name, this->consume(type_lexer::token::token_type::IDENTIFIER).identifier});
+        parameters.push_back(this->parser_parameter());
     }
 
     this->consume(type_lexer::token::token_type::EOL);
@@ -45,4 +43,21 @@ TypeDefinition TypeParser::parse_next_type() {
 }
 
 TypeParser::~TypeParser() {
+}
+
+
+
+//private
+Parameter TypeParser::parser_parameter() {
+    std::string name = this->consume(type_lexer::token::token_type::IDENTIFIER).identifier;
+    this->consume(type_lexer::token::token_type::ASSIGN);
+    std::string type = this->consume(type_lexer::token::token_type::IDENTIFIER).identifier;
+    bool is_vector = false;
+
+    if(this->accept(type_lexer::token::token_type::VECTOR)) {
+        is_vector = true;
+        this->consume();
+    }
+    
+    return Parameter{name, type, is_vector};
 }

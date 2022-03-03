@@ -10,6 +10,8 @@
 
 namespace type_parser {
     class TypeParser : public ParserBase<type_lexer::type_lexer, type_lexer::token> {
+        private:
+            Parameter parser_parameter();
         public:
             TypeParser(type_lexer::type_lexer& lexer);
             TypeDefinition parse_next_type();
