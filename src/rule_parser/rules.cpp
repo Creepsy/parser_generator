@@ -58,6 +58,7 @@ bool rule_parser::operator<(const RuleResult& first, const RuleResult& second) {
 bool rule_parser::operator<(const Argument& first, const Argument& second) {
     return comparators::smaller_lex_comparator(
         std::make_pair(first.is_token, second.is_token),
+        std::make_pair(first.is_vector, second.is_vector),
         std::make_pair(first.identifier, second.identifier)
     );
 }

@@ -15,8 +15,8 @@
 #include "../../type_parser/types.h"
 
 namespace states {
-    //Key: TypeName, Value: possible start tokens
-    typedef std::map<std::string, std::set<rule_parser::Argument>> StartTokensTable;
+    //Key: Type, Value: possible start tokens
+    typedef std::map<rule_parser::Argument, std::set<rule_parser::Argument>> StartTokensTable;
 
     class RuleState {
         private:
@@ -62,10 +62,10 @@ namespace states {
     
     StartTokensTable construct_start_token_table(const std::vector<rule_parser::RuleDefinition>& rules, const type_parser::TypeInfoTable& type_infos);
     
-    std::set<std::string> get_start_tokens(const std::string& type, const StartTokensTable& start_table);
-    std::set<std::string> get_start_tokens(const std::string& type, const StartTokensTable& start_table, std::set<std::string>& visited_types);
+    std::set<rule_parser::Argument> get_start_tokens(const rule_parser::Argument& type, const StartTokensTable& start_table);
+    std::set<rule_parser::Argument> get_start_tokens(const rule_parser::Argument& type, const StartTokensTable& start_table, std::set<rule_parser::Argument>& visited_types);
 
-    std::set<rule_parser::Argument> get_lookahead_tokens(const State& state, const std::string& type, const StartTokensTable& start_table, const type_parser::TypeInfoTable& type_infos);
+    std::set<rule_parser::Argument> get_lookahead_tokens(const State& state, const rule_parser::Argument& type, const StartTokensTable& start_table, const type_parser::TypeInfoTable& type_infos);
 
     std::ostream& operator<<(std::ostream& stream, const RuleState& to_write);
     std::ostream& operator<<(std::ostream& stream, const Action& to_write);

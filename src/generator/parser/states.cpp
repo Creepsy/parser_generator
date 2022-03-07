@@ -77,23 +77,35 @@ State states::State::advance(const rule_parser::Argument& to_expect, const type_
 
 StartTokensTable states::construct_start_token_table(const std::vector<rule_parser::RuleDefinition>& rules, const type_parser::TypeInfoTable& type_infos) {
     StartTokensTable start_table;
-    
-    for(const std::pair<std::string, type_parser::TypeInfo>& type_info : type_infos)
-        start_table.insert(std::make_pair(type_info.first, std::set<rule_parser::Argument>{}));
+
+    auto copy_entry = [&](const rule_parser::Argument& from, const rule_parser::Argument& to) -> void {
+        std::copy(
+            start_table[from].begin(), start_table[from].end(),
+            std::inserter(start_table[to], start_table[to].end())
+        );
+    };
+
+    //For Token[]
+    start_table.insert(std::make_pair(rule_parser::Argument{false, true, "Token"}, std::set<rule_parser::Argument>{}));
+
+    for(const std::pair<std::string, type_parser::TypeInfo>& type_info : type_infos) {
+        start_table.insert(std::make_pair(rule_parser::Argument{false, false, type_info.first}, std::set<rule_parser::Argument>{}));
+        start_table.insert(std::make_pair(rule_parser::Argument{false, true, type_info.first}, std::set<rule_parser::Argument>{}));
+    }
 
     for(const rule_parser::RuleDefinition& rule : rules) {
         if(!rule.arguments.empty() && !rule.is_entry) 
-            start_table[rule.result.type.identifier].insert(rule.arguments.front()); 
+            start_table[rule.result.type].insert(rule.arguments.front()); 
     }   
 
     for(const std::pair<std::string, type_parser::TypeInfo>& type_info : type_infos) {
         if(type_info.second.is_base) {
-            for(const std::string& possible_type : type_info.second.possible_types) {
-                std::copy(
-                    start_table[possible_type].begin(), start_table[possible_type].end(),
-                    std::inserter(start_table[type_info.first], start_table[type_info.first].end())
-                );
-                
+            const rule_parser::Argument base_type{false, false, type_info.first};
+            const rule_parser::Argument base_type_vec{false, true, type_info.first};
+
+            for(const std::string& possible_type_str : type_info.second.possible_types) {
+                copy_entry(rule_parser::Argument{false, false, possible_type_str}, base_type);
+                copy_entry(rule_parser::Argument{false, true, possible_type_str}, base_type_vec);
             }
         }
     }
@@ -101,23 +113,23 @@ StartTokensTable states::construct_start_token_table(const std::vector<rule_pars
     return start_table;
 }
 
-std::set<std::string> states::get_start_tokens(const std::string& type, const StartTokensTable& start_table) {
-    std::set<std::string> visited_types;
+std::set<rule_parser::Argument> states::get_start_tokens(const rule_parser::Argument& type, const StartTokensTable& start_table) {
+    std::set<rule_parser::Argument> visited_types;
 
     return get_start_tokens(type, start_table, visited_types);
 }
 
-std::set<std::string> states::get_start_tokens(const std::string& type, const StartTokensTable& start_table, std::set<std::string>& visited_types) {
-    std::set<std::string> start_tokens;
+std::set<rule_parser::Argument> states::get_start_tokens(const rule_parser::Argument& type, const StartTokensTable& start_table, std::set<rule_parser::Argument>& visited_types) {
+    std::set<rule_parser::Argument> start_tokens;
 
     visited_types.insert(type);
 
     for(const rule_parser::Argument& possible_start : start_table.at(type)) {
         if(possible_start.is_token) {
-            start_tokens.insert(possible_start.identifier);
+            start_tokens.insert(possible_start);
         } else {
-            if(!visited_types.contains(possible_start.identifier)) {
-                start_tokens.merge(get_start_tokens(possible_start.identifier, start_table, visited_types));
+            if(!visited_types.contains(possible_start)) {
+                start_tokens.merge(get_start_tokens(possible_start, start_table, visited_types));
             }
         }
     }
@@ -125,7 +137,7 @@ std::set<std::string> states::get_start_tokens(const std::string& type, const St
     return start_tokens;
 }
 
-std::set<rule_parser::Argument> states::get_lookahead_tokens(const State& state, const std::string& type, const StartTokensTable& start_table, const type_parser::TypeInfoTable& type_infos) {
+std::set<rule_parser::Argument> states::get_lookahead_tokens(const State& state, const rule_parser::Argument& type, const StartTokensTable& start_table, const type_parser::TypeInfoTable& type_infos) {
     std::set<rule_parser::Argument> follow_up_tokens;
 
     for(const RuleState& rule : state.rule_possibilities) {
@@ -133,18 +145,12 @@ std::set<rule_parser::Argument> states::get_lookahead_tokens(const State& state,
         std::optional<rule_parser::Argument> follow_up = rule.lookahead();
 
         if(curr.has_value()) {
-            if(!curr.value().is_token && type_parser::is_convertible(type, curr.value().identifier, type_infos)) {
+            if(!curr.value().is_token && type_parser::is_convertible(type.identifier, curr.value().identifier, type_infos) && type.is_vector == curr.value().is_vector) {
                 if(follow_up.has_value()) {
                     if(follow_up.value().is_token) {
                         follow_up_tokens.insert(rule_parser::Argument{false, false, follow_up.value().identifier});
                     } else {
-                        std::set<std::string> start_tokens = get_start_tokens(follow_up.value().identifier, start_table);
-
-                        std::transform(start_tokens.begin(), start_tokens.end(), std::inserter(follow_up_tokens, follow_up_tokens.end()), 
-                            [](const std::string& token) -> rule_parser::Argument {
-                                return rule_parser::Argument{false, false, token};
-                            }
-                        );
+                        follow_up_tokens.merge(get_start_tokens(follow_up.value(), start_table));
                     }
                 } else {
                     std::copy(rule.get_possible_lookaheads().begin(), rule.get_possible_lookaheads().end(), std::inserter(follow_up_tokens, follow_up_tokens.end()));

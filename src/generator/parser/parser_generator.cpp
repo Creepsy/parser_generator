@@ -25,7 +25,7 @@ void complete_rules(states::State& to_process, const std::vector<rule_parser::Ru
     );
 
     for(const rule_parser::RuleDefinition& added_rule : rules_to_add) {
-        std::set<rule_parser::Argument> lookahead_tokens = states::get_lookahead_tokens(to_process, added_rule.result.type.identifier, start_table, type_infos);
+        std::set<rule_parser::Argument> lookahead_tokens = states::get_lookahead_tokens(to_process, added_rule.result.type, start_table, type_infos);
         to_process.rule_possibilities.erase(states::RuleState(added_rule));
         to_process.rule_possibilities.insert(states::RuleState(added_rule, 0, lookahead_tokens));
     }
