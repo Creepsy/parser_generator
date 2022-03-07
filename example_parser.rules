@@ -5,3 +5,5 @@ numeric <ADD> int : addition($0, $1, $2);
 value : value[]($0);
 value[] <COMMA> value : value[]($0, $2);
 value[] : list($0);
+
+<ADD> <TRAS> <TEST> : Token[]($0, $1, $2);

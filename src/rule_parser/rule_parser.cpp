@@ -104,5 +104,8 @@ RuleDefinition&& rule_parser::RuleParser::decorate_rule(RuleDefinition&& to_deco
         }
     }
 
+    if(to_decorate.result.type.identifier == "Token")
+        to_decorate.result.type.is_token = true;
+
     return std::move(to_decorate);
 }
