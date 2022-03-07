@@ -2,6 +2,6 @@
 numeric <ADD> int : addition($0, $1, $2);
 <INT> : int($0);
 
-value : value[]{$0};
-value[] <COMMA> value : $0 + {$2};
+value : value[]($0);
+value[] <COMMA> value : value[]($0, $2);
 value[] : list($0);

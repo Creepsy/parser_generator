@@ -59,11 +59,25 @@ RuleResult rule_parser::RuleParser::parse_rule_result() {
     }
 
     std::string type = this->consume(rule_lexer::token::IDENTIFIER).identifier;
+    bool is_vector = false;
+
+    if(this->accept(rule_lexer::token::VECTOR)) {
+        is_vector = true;
+        this->consume();
+    }
 
     this->consume(rule_lexer::token::PAR_OPEN);
 
+    std::vector<std::optional<size_t>> arguments = this->parse_result_arguments(rule_lexer::token::PAR_CLOSE);    
+
+    this->consume(rule_lexer::token::PAR_CLOSE);
+
+    return RuleResult{(is_vector) ? RuleResult::CREATE_VECTOR : RuleResult::CREATE_NEW, Argument{false, is_vector, type}, arguments};
+}
+
+std::vector<std::optional<size_t>> rule_parser::RuleParser::parse_result_arguments(const rule_lexer::token::token_type terminating_token) {
     std::vector<std::optional<size_t>> arguments;
-    while(!this->accept(rule_lexer::token::PAR_CLOSE) && !this->end()) {
+    while(!this->accept(terminating_token) && !this->end()) {
         if(!arguments.empty()) this->consume(rule_lexer::token::SEPERATOR);
         
         if(this->accept(rule_lexer::token::EMPTY)) {
@@ -74,9 +88,7 @@ RuleResult rule_parser::RuleParser::parse_rule_result() {
         }
     }
 
-    this->consume(rule_lexer::token::PAR_CLOSE);
-
-    return RuleResult{RuleResult::CREATE_NEW, Argument{false, false, type}, arguments};
+    return arguments;
 }
 
 RuleDefinition&& rule_parser::RuleParser::decorate_rule(RuleDefinition&& to_decorate) {

@@ -17,7 +17,8 @@ namespace rule_parser {
     struct RuleResult {
         enum ResultType {
             CREATE_NEW, // expects arguments to have at least one member (which is not of the type Token)
-            PASS_ARG
+            PASS_ARG,
+            CREATE_VECTOR
         };
 
         ResultType result_type;
