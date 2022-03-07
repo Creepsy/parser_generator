@@ -70,8 +70,8 @@ bool type_parser::is_convertible(const std::string& from, const std::string& to,
             return false;
 
         if(type_infos.at(from).is_base && type_infos.at(to).is_base) {
-            const std::set<std::string>& expected_types = type_infos.at(from).possible_types;
-            const std::set<std::string>& actual_types = type_infos.at(to).possible_types;
+            const std::set<std::string>& expected_types = type_infos.at(to).possible_types;
+            const std::set<std::string>& actual_types = type_infos.at(from).possible_types;
 
             if(!std::includes(expected_types.begin(), expected_types.end(), actual_types.begin(), actual_types.end()))
                 return false;
