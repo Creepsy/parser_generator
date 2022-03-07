@@ -25,7 +25,7 @@ void complete_rules(states::State& to_process, const std::vector<rule_parser::Ru
     );
 
     for(const rule_parser::RuleDefinition& added_rule : rules_to_add) {
-        std::set<std::string> lookahead_tokens = states::get_lookahead_tokens(to_process, added_rule.result.type.identifier, start_table, type_infos);
+        std::set<rule_parser::Argument> lookahead_tokens = states::get_lookahead_tokens(to_process, added_rule.result.type.identifier, start_table, type_infos);
         to_process.rule_possibilities.erase(states::RuleState(added_rule));
         to_process.rule_possibilities.insert(states::RuleState(added_rule, 0, lookahead_tokens));
     }
@@ -44,7 +44,7 @@ void generate_actions(states::State& to_process, std::map<states::State, size_t>
                     to_process.actions.insert(states::Action{
                         (arg.is_token) ? states::Action::SHIFT : states::Action::GOTO,
                         sub_state_id,
-                        std::set<std::string>{arg.identifier}
+                        std::set<rule_parser::Argument>{arg}
                     });
                 }
             }
@@ -120,8 +120,10 @@ std::set<rule_parser::RuleDefinition> parser_generator::get_sub_rules(const std:
         for(const rule_parser::RuleDefinition& rule : rules) {
             if(!rule.is_entry && !already_checked.contains(rule)) {
                 if(type_parser::is_convertible(rule.result.type.identifier, to_check.curr().value().identifier, type_infos)) {
-                    sub_rules.insert(rule);
-                    sub_rules.merge(get_sub_rules(rules, states::RuleState(rule), type_infos, already_checked));
+                    if(rule.result.type.is_vector == to_check.curr().value().is_vector) {
+                        sub_rules.insert(rule);
+                        sub_rules.merge(get_sub_rules(rules, states::RuleState(rule), type_infos, already_checked));
+                    }
                 }
             }
         }

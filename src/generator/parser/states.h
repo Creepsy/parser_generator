@@ -23,16 +23,16 @@ namespace states {
             const rule_parser::RuleDefinition rule;
             size_t position;
 
-            std::set<std::string> possible_lookaheads;
+            std::set<rule_parser::Argument> possible_lookaheads;
         public:
             explicit RuleState(const rule_parser::RuleDefinition& rule);
-            RuleState(const rule_parser::RuleDefinition& rule, const size_t position, const std::set<std::string>& possible_lookaheads);
+            RuleState(const rule_parser::RuleDefinition& rule, const size_t position, const std::set<rule_parser::Argument>& possible_lookaheads);
             std::optional<RuleState> advance(const rule_parser::Argument& to_expect, const type_parser::TypeInfoTable& type_infos) const;
             std::optional<rule_parser::Argument> get(const size_t position) const;
             std::optional<rule_parser::Argument> curr() const;
             std::optional<rule_parser::Argument> lookahead() const;
             const rule_parser::RuleDefinition& get_rule() const;
-            const std::set<std::string>& get_possible_lookaheads() const;
+            const std::set<rule_parser::Argument>& get_possible_lookaheads() const;
             bool end() const;
             ~RuleState();
 
@@ -50,7 +50,7 @@ namespace states {
 
         ActionType type;
         std::variant<rule_parser::RuleDefinition, size_t> operand; //RuleDefinition for REDUCE / ACCEPT; size_t for GOTO / SHIFT
-        std::set<std::string> possible_lookaheads;
+        std::set<rule_parser::Argument> possible_lookaheads;
     };
 
     struct State {
@@ -65,7 +65,7 @@ namespace states {
     std::set<std::string> get_start_tokens(const std::string& type, const StartTokensTable& start_table);
     std::set<std::string> get_start_tokens(const std::string& type, const StartTokensTable& start_table, std::set<std::string>& visited_types);
 
-    std::set<std::string> get_lookahead_tokens(const State& state, const std::string& type, const StartTokensTable& start_table, const type_parser::TypeInfoTable& type_infos);
+    std::set<rule_parser::Argument> get_lookahead_tokens(const State& state, const std::string& type, const StartTokensTable& start_table, const type_parser::TypeInfoTable& type_infos);
 
     std::ostream& operator<<(std::ostream& stream, const RuleState& to_write);
     std::ostream& operator<<(std::ostream& stream, const Action& to_write);

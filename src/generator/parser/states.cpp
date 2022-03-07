@@ -11,7 +11,7 @@ using namespace states;
 states::RuleState::RuleState(const rule_parser::RuleDefinition& rule) : rule(rule), position(0) {
 }
 
-states::RuleState::RuleState(const rule_parser::RuleDefinition& rule, const size_t position, const std::set<std::string>& possible_lookaheads)
+states::RuleState::RuleState(const rule_parser::RuleDefinition& rule, const size_t position, const std::set<rule_parser::Argument>& possible_lookaheads)
  : rule(rule), position(position), possible_lookaheads(possible_lookaheads) {
 
 }
@@ -24,6 +24,9 @@ std::optional<RuleState> states::RuleState::advance(const rule_parser::Argument&
     std::string to = (this->curr().value().is_token) ? "Token" : this->curr().value().identifier;
 
     if(from == "Token" && to == "Token" && to_expect.identifier != this->curr().value().identifier)
+        return std::nullopt;
+
+    if(to_expect.is_vector != this->curr().value().is_vector)
         return std::nullopt;
 
     return (type_parser::is_convertible(from, to, type_infos)) ? std::optional<RuleState>(RuleState(this->rule, this->position + 1, this->possible_lookaheads)) : std::nullopt;
@@ -45,7 +48,7 @@ const rule_parser::RuleDefinition& states::RuleState::get_rule() const {
     return this->rule;
 }
 
-const std::set<std::string>& states::RuleState::get_possible_lookaheads() const {
+const std::set<rule_parser::Argument>& states::RuleState::get_possible_lookaheads() const {
     return this->possible_lookaheads;
 }
 
@@ -122,8 +125,8 @@ std::set<std::string> states::get_start_tokens(const std::string& type, const St
     return start_tokens;
 }
 
-std::set<std::string> states::get_lookahead_tokens(const State& state, const std::string& type, const StartTokensTable& start_table, const type_parser::TypeInfoTable& type_infos) {
-    std::set<std::string> follow_up_tokens;
+std::set<rule_parser::Argument> states::get_lookahead_tokens(const State& state, const std::string& type, const StartTokensTable& start_table, const type_parser::TypeInfoTable& type_infos) {
+    std::set<rule_parser::Argument> follow_up_tokens;
 
     for(const RuleState& rule : state.rule_possibilities) {
         std::optional<rule_parser::Argument> curr = rule.curr();
@@ -133,9 +136,15 @@ std::set<std::string> states::get_lookahead_tokens(const State& state, const std
             if(!curr.value().is_token && type_parser::is_convertible(type, curr.value().identifier, type_infos)) {
                 if(follow_up.has_value()) {
                     if(follow_up.value().is_token) {
-                        follow_up_tokens.insert(follow_up.value().identifier);
+                        follow_up_tokens.insert(rule_parser::Argument{false, false, follow_up.value().identifier});
                     } else {
-                        follow_up_tokens.merge(get_start_tokens(follow_up.value().identifier, start_table));
+                        std::set<std::string> start_tokens = get_start_tokens(follow_up.value().identifier, start_table);
+
+                        std::transform(start_tokens.begin(), start_tokens.end(), std::inserter(follow_up_tokens, follow_up_tokens.end()), 
+                            [](const std::string& token) -> rule_parser::Argument {
+                                return rule_parser::Argument{false, false, token};
+                            }
+                        );
                     }
                 } else {
                     std::copy(rule.get_possible_lookaheads().begin(), rule.get_possible_lookaheads().end(), std::inserter(follow_up_tokens, follow_up_tokens.end()));
@@ -150,8 +159,8 @@ std::set<std::string> states::get_lookahead_tokens(const State& state, const std
 
 
 std::ostream& states::operator<<(std::ostream& stream, const RuleState& to_write) {
-    stream << "<<<";
-    for(const std::string& lookahead : to_write.get_possible_lookaheads()) 
+    stream << "<<< ";
+    for(const rule_parser::Argument& lookahead : to_write.get_possible_lookaheads()) 
         stream << lookahead << " ";
 
     stream << ">>> ";
@@ -178,7 +187,7 @@ std::ostream& states::operator<<(std::ostream& stream, const Action& to_write) {
 
     stream << " on ";
 
-    for(const std::string& lookahead : to_write.possible_lookaheads)
+    for(const rule_parser::Argument& lookahead : to_write.possible_lookaheads)
         stream << lookahead << " ";
 
     return stream;
