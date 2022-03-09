@@ -10,4 +10,5 @@ ASSIGN \:
 SEPERATOR \,
 TOKEN <[a-zA-Z_]\w*>
 INDEX $\d+
+SCOPE #[a-zA-Z_]\w*
 IDENTIFIER [a-zA-Z_]\w*

@@ -31,6 +31,9 @@ std::ostream& rule_parser::operator<<(std::ostream& stream, const Argument& to_w
     if(to_write.is_vector)
         stream << "[]";
 
+    if(!to_write.scope.empty())
+        stream << "#" << to_write.scope;
+
     return stream;
 }
 
@@ -44,7 +47,10 @@ std::ostream& rule_parser::operator<<(std::ostream& stream, const RuleDefinition
 }
 
 bool rule_parser::operator==(const Argument& first, const Argument& second) {
-    return first.is_token == second.is_token && first.is_vector == second.is_vector && first.identifier == second.identifier;
+    return first.is_token == second.is_token && 
+           first.is_vector == second.is_vector && 
+           first.identifier == second.identifier &&
+           first.scope == second.scope;
 }
 
 bool rule_parser::operator<(const RuleResult& first, const RuleResult& second) {
@@ -59,7 +65,8 @@ bool rule_parser::operator<(const Argument& first, const Argument& second) {
     return comparators::smaller_lex_comparator(
         std::make_pair(first.is_token, second.is_token),
         std::make_pair(first.is_vector, second.is_vector),
-        std::make_pair(first.identifier, second.identifier)
+        std::make_pair(first.identifier, second.identifier),
+        std::make_pair(first.scope, second.scope)
     );
 }
 

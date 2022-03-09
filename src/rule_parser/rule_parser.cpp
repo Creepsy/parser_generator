@@ -46,7 +46,11 @@ std::vector<Argument> rule_parser::RuleParser::parse_arguments() {
                 this->consume();
             }
 
-            args.push_back(Argument{false, is_vector, identifier});
+            std::string scope;
+            if(this->accept(rule_lexer::token::SCOPE))
+                scope = this->consume().identifier.substr(1);
+
+            args.push_back(Argument{false, is_vector, identifier, scope});
         }
     } while(!this->accept(rule_lexer::token::ASSIGN) && !this->end());
 
@@ -72,7 +76,11 @@ RuleResult rule_parser::RuleParser::parse_rule_result() {
 
     this->consume(rule_lexer::token::PAR_CLOSE);
 
-    return RuleResult{(is_vector) ? RuleResult::CREATE_VECTOR : RuleResult::CREATE_NEW, Argument{false, is_vector, type}, arguments};
+    std::string scope;
+    if(this->accept(rule_lexer::token::SCOPE))
+        scope = this->consume().identifier.substr(1);
+
+    return RuleResult{(is_vector) ? RuleResult::CREATE_VECTOR : RuleResult::CREATE_NEW, Argument{false, is_vector, type, scope}, arguments};
 }
 
 std::vector<std::optional<size_t>> rule_parser::RuleParser::parse_result_arguments(const rule_lexer::token::token_type terminating_token) {
