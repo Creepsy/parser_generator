@@ -1,3 +1,9 @@
-* numeric <EOF> : $0;
+* value <EOF> : $0;
 numeric <ADD> int : addition($0, $1, $2);
 <INT> : int($0);
+
+numeric : numeric[]($0);
+numeric[] <COMMA> numeric : numeric[]($0, $2);
+numeric[] : list($0);
+<OMG> addition : addition[]($1);
+addition[] : list($0);

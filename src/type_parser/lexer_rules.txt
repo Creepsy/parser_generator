@@ -1,6 +1,7 @@
 $WSPACE \s+
 $COMMENT //.*
 EOL ;
+VECTOR \[\]
 PAR_OPEN \(
 PAR_CLOSE \)
 ASSIGN \:

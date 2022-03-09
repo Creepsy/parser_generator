@@ -10,7 +10,7 @@ void complete_rules(states::State& to_process, const std::vector<rule_parser::Ru
         const type_parser::TypeInfoTable& type_infos, const states::StartTokensTable& start_table);
 void generate_actions(states::State& to_process, std::map<states::State, size_t>& processed, const std::vector<rule_parser::RuleDefinition>& rules,
         const type_parser::TypeInfoTable& type_infos, const states::StartTokensTable& start_table);
-std::set<rule_parser::Parameter> unwrap_parameter(const rule_parser::Parameter& to_unwrap, const type_parser::TypeInfoTable& type_infos);
+std::set<rule_parser::Argument> unwrap_type(const rule_parser::Argument& to_unwrap, const type_parser::TypeInfoTable& type_infos);
 
 void complete_rules(states::State& to_process, const std::vector<rule_parser::RuleDefinition>& rules,
         const type_parser::TypeInfoTable& type_infos, const states::StartTokensTable& start_table) {
@@ -25,7 +25,7 @@ void complete_rules(states::State& to_process, const std::vector<rule_parser::Ru
     );
 
     for(const rule_parser::RuleDefinition& added_rule : rules_to_add) {
-        std::set<std::string> lookahead_tokens = states::get_lookahead_tokens(to_process, added_rule.result.type, start_table, type_infos);
+        std::set<rule_parser::Argument> lookahead_tokens = states::get_lookahead_tokens(to_process, added_rule.result.type, start_table, type_infos);
         to_process.rule_possibilities.erase(states::RuleState(added_rule));
         to_process.rule_possibilities.insert(states::RuleState(added_rule, 0, lookahead_tokens));
     }
@@ -33,18 +33,18 @@ void complete_rules(states::State& to_process, const std::vector<rule_parser::Ru
 
 void generate_actions(states::State& to_process, std::map<states::State, size_t>& processed, const std::vector<rule_parser::RuleDefinition>& rules,
         const type_parser::TypeInfoTable& type_infos, const states::StartTokensTable& start_table) {
-    std::set<rule_parser::Parameter> processed_parameters;
+    std::set<rule_parser::Argument> processed_parameters;
     for(const states::RuleState& rule : to_process.rule_possibilities) {
         if(rule.curr().has_value()) {
-            for(const rule_parser::Parameter& par : unwrap_parameter(rule.curr().value(), type_infos)) {
-                if(!processed_parameters.contains(par)) {
-                    processed_parameters.insert(par);
+            for(const rule_parser::Argument& arg : unwrap_type(rule.curr().value(), type_infos)) {
+                if(!processed_parameters.contains(arg)) {
+                    processed_parameters.insert(arg);
 
-                    size_t sub_state_id = process_state(to_process.advance(par, type_infos), processed, rules, type_infos, start_table);
+                    size_t sub_state_id = process_state(to_process.advance(arg, type_infos), processed, rules, type_infos, start_table);
                     to_process.actions.insert(states::Action{
-                        (par.is_token) ? states::Action::SHIFT : states::Action::GOTO,
+                        (arg.is_token) ? states::Action::SHIFT : states::Action::GOTO,
                         sub_state_id,
-                        std::set<std::string>{par.identifier}
+                        std::set<rule_parser::Argument>{arg}
                     });
                 }
             }
@@ -58,16 +58,16 @@ void generate_actions(states::State& to_process, std::map<states::State, size_t>
     }
 }
 
-std::set<rule_parser::Parameter> unwrap_parameter(const rule_parser::Parameter& to_unwrap, const type_parser::TypeInfoTable& type_infos) {
-    if(to_unwrap.is_token || !type_infos.at(to_unwrap.identifier).is_base)
-        return std::set<rule_parser::Parameter>{to_unwrap};
+std::set<rule_parser::Argument> unwrap_type(const rule_parser::Argument& to_unwrap, const type_parser::TypeInfoTable& type_infos) {
+    if(to_unwrap.is_token || to_unwrap.is_vector || !type_infos.at(to_unwrap.identifier).is_base)
+        return std::set<rule_parser::Argument>{to_unwrap};
 
-    std::set<rule_parser::Parameter> unwrapped;
+    std::set<rule_parser::Argument> unwrapped;
     const std::set<std::string>& possible_types = type_infos.at(to_unwrap.identifier).possible_types; 
 
     std::transform(possible_types.begin(), possible_types.end(), std::inserter(unwrapped, unwrapped.end()), 
-        [](const std::string& type) -> rule_parser::Parameter {
-            return rule_parser::Parameter{false, type};    
+        [&](const std::string& type) -> rule_parser::Argument {
+            return rule_parser::Argument{false, false, type};    
         }
     );
 
@@ -119,9 +119,13 @@ std::set<rule_parser::RuleDefinition> parser_generator::get_sub_rules(const std:
     if(to_check.curr().has_value() && !to_check.curr().value().is_token) {
         for(const rule_parser::RuleDefinition& rule : rules) {
             if(!rule.is_entry && !already_checked.contains(rule)) {
-                if(type_parser::is_convertible(rule.result.type, to_check.curr().value().identifier, type_infos)) {
-                    sub_rules.insert(rule);
-                    sub_rules.merge(get_sub_rules(rules, states::RuleState(rule), type_infos, already_checked));
+                if(type_parser::is_convertible(rule.result.type.identifier, to_check.curr().value().identifier, type_infos)) {
+                    if(rule.result.type.is_vector == to_check.curr().value().is_vector) {
+                        if(!rule.result.type.is_vector || rule.result.type.identifier == to_check.curr().value().identifier) {
+                            sub_rules.insert(rule);
+                            sub_rules.merge(get_sub_rules(rules, states::RuleState(rule), type_infos, already_checked));
+                        }
+                    }
                 }
             }
         }

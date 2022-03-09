@@ -13,26 +13,6 @@
 #include "generator/parser/parser_generator.h"
 
 int main() {
-    std::ifstream rule_input{"../example_parser.rules"};
-
-    if(!rule_input.is_open()) {
-        std::cerr << "Unable to open input file!" << std::endl;
-        return -1;
-    }
-
-    rule_lexer::rule_lexer rule_lex{rule_input};
-    rule_parser::RuleParser rule_pars{rule_lex};
-
-    std::vector<rule_parser::RuleDefinition> rules;
-
-    while(!rule_pars.end()) {
-        rules.push_back(rule_pars.parse_next_rule());
-    }
-
-    rule_input.close();
-
-
-
     std::ifstream type_input{"../example_parser.types"};
 
     if(!type_input.is_open()) {
@@ -47,9 +27,31 @@ int main() {
 
     while(!type_pars.end()) {
         types.push_back(type_pars.parse_next_type());
+        std::cout << types.back() << std::endl;
     }
 
     type_input.close();
+
+
+
+    std::ifstream rule_input{"../example_parser.rules"};
+
+    if(!rule_input.is_open()) {
+        std::cerr << "Unable to open input file!" << std::endl;
+        return -1;
+    }
+
+    rule_lexer::rule_lexer rule_lex{rule_input};
+    rule_parser::RuleParser rule_pars{rule_lex};
+
+    std::vector<rule_parser::RuleDefinition> rules;
+
+    while(!rule_pars.end()) {
+        rules.push_back(rule_pars.parse_next_rule());
+        std::cout << rules.back() << std::endl;
+    }
+
+    rule_input.close();
 
 
 

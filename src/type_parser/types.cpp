@@ -8,8 +8,11 @@ using namespace type_parser;
 std::ostream& write_parameters(std::ostream& stream, const std::vector<Parameter>& to_write, const size_t indentation_level = 1);
 
 std::ostream& write_parameters(std::ostream& stream, const std::vector<Parameter>& to_write, const size_t indentation_level) {
-    for(const Parameter& par : to_write) 
-        stream << std::string(indentation_level, '\t') << par.first << " : " << par.second << "\n";
+    for(const Parameter& par : to_write) {
+        stream << std::string(indentation_level, '\t') << par.identifier << " : " << par.type;
+        if(par.is_vector) stream << "[]";
+        stream << "\n";
+    }
 
     return stream;
 }
@@ -67,8 +70,8 @@ bool type_parser::is_convertible(const std::string& from, const std::string& to,
             return false;
 
         if(type_infos.at(from).is_base && type_infos.at(to).is_base) {
-            const std::set<std::string>& expected_types = type_infos.at(from).possible_types;
-            const std::set<std::string>& actual_types = type_infos.at(to).possible_types;
+            const std::set<std::string>& expected_types = type_infos.at(to).possible_types;
+            const std::set<std::string>& actual_types = type_infos.at(from).possible_types;
 
             if(!std::includes(expected_types.begin(), expected_types.end(), actual_types.begin(), actual_types.end()))
                 return false;

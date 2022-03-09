@@ -10,45 +10,82 @@ using namespace rule_parser;
 
 //helper functions
 void validate_rule_result(const RuleDefinition& to_validate, const type_parser::TypeInfoTable& type_infos);
+void validate_create_new_result(const RuleDefinition& to_validate, const type_parser::TypeInfoTable& type_infos);
+void validate_create_vector_result(const RuleDefinition& to_validate, const type_parser::TypeInfoTable& type_infos);
 void validate_result_argument(const RuleDefinition& to_validate, const size_t arg, const type_parser::TypeInfoTable& type_infos);
 
 void validate_rule_result(const RuleDefinition& to_validate, const type_parser::TypeInfoTable& type_infos) {
-    if(to_validate.result.type.empty())
+    if(to_validate.result.type.identifier.empty())
         throw std::runtime_error("The rule is missing a return type!");
 
-    if(to_validate.result.type == "Token") 
-        throw std::runtime_error("The result of a rule can't be a token!");
+    if(!type_infos.contains(to_validate.result.type.identifier) && !to_validate.result.type.is_token)
+        throw std::runtime_error("The type '" + to_validate.result.type.identifier + "' doesn't exist!");
 
-    if(!type_infos.contains(to_validate.result.type))
-        throw std::runtime_error("The type '" + to_validate.result.type + "' doesn't exist!");
+    switch(to_validate.result.result_type) {
+        case RuleResult::PASS_ARG:
+            if(to_validate.result.type.is_token && !to_validate.result.type.is_vector)
+                throw std::runtime_error("The result of a rule can't be a token!");
+            break;
+        case RuleResult::CREATE_NEW:
+            validate_create_new_result(to_validate, type_infos);
+            break;
+        case RuleResult::CREATE_VECTOR:
+            validate_create_vector_result(to_validate, type_infos);
+            break;
+        default:
+            throw std::runtime_error("Invalid rule result type!");
+    }
+}
 
-    if(to_validate.result.result_type == RuleResult::CREATE_NEW) {
-        const type_parser::TypeInfo& return_type_info = type_infos.at(to_validate.result.type);
+void validate_create_new_result(const RuleDefinition& to_validate, const type_parser::TypeInfoTable& type_infos) {
+    if(to_validate.result.type.is_token)
+        throw std::runtime_error("Invalid construction of a token!");
 
-        if(return_type_info.is_base) 
-            throw std::runtime_error("Base types can't be constructed!");
+    if(to_validate.result.type.is_vector)
+        throw std::runtime_error("Invalid construction of a vector!");
 
-        if(return_type_info.parameters.size() != to_validate.result.arguments.size()) 
-            throw std::runtime_error("Mismatched argument count!");
+    const type_parser::TypeInfo& return_type_info = type_infos.at(to_validate.result.type.identifier);
 
-        for(size_t arg = 0; arg < to_validate.result.arguments.size(); arg++) 
-            validate_result_argument(to_validate, arg, type_infos);   
+    if(return_type_info.is_base) 
+        throw std::runtime_error("Base types can't be constructed!");
+
+    if(return_type_info.parameters.size() != to_validate.result.argument_ids.size()) 
+        throw std::runtime_error("Mismatched argument count!");
+
+    for(size_t arg = 0; arg < to_validate.result.argument_ids.size(); arg++) 
+        validate_result_argument(to_validate, arg, type_infos);
+}
+
+void validate_create_vector_result(const RuleDefinition& to_validate, const type_parser::TypeInfoTable& type_infos) {
+    const std::string expected_type = to_validate.result.type.identifier;
+
+    for(const std::optional<size_t>& index : to_validate.result.argument_ids) {
+        if(!index.has_value())
+            throw std::runtime_error("EMPTY in vector constructors is not allowed!");
+
+        const std::string& actual_type = (to_validate.arguments[index.value()].is_token) ? "Token" : to_validate.arguments[index.value()].identifier;
+
+        if(!type_parser::is_convertible(actual_type, expected_type, type_infos))
+            throw std::runtime_error("Expected type '" + expected_type + "', found '" + actual_type + "'!");
     }
 }
 
 void validate_result_argument(const RuleDefinition& to_validate, const size_t arg, const type_parser::TypeInfoTable& type_infos) {
-    const type_parser::TypeInfo& return_type_info = type_infos.at(to_validate.result.type);
-    const std::optional<size_t>& index = to_validate.result.arguments[arg];
+    const type_parser::TypeInfo& return_type_info = type_infos.at(to_validate.result.type.identifier);
+    const std::optional<size_t>& index = to_validate.result.argument_ids[arg];
 
     if(!index.has_value()) {
-        if(return_type_info.parameters.at(arg).second == "Token") 
+        if(return_type_info.parameters.at(arg).type == "Token") 
             throw std::runtime_error("Tokens can't be default constructed!");
     } else {
-        const std::string& expected_type = return_type_info.parameters.at(arg).second;
-        const std::string& actual_type = (to_validate.parameters[index.value()].is_token) ? "Token" : to_validate.parameters[index.value()].identifier;
+        const std::string& expected_type = return_type_info.parameters.at(arg).type;
+        const std::string& actual_type = (to_validate.arguments[index.value()].is_token) ? "Token" : to_validate.arguments[index.value()].identifier;
+
+        if(!return_type_info.parameters.at(arg).is_vector && to_validate.arguments[index.value()].is_vector)
+            throw std::runtime_error("Can't convert a vector to a normal type!");
 
         if(!type_parser::is_convertible(actual_type, expected_type, type_infos))
-            throw std::runtime_error("Expected type '" + expected_type + ", found '" + actual_type + "'!");
+            throw std::runtime_error("Expected type '" + expected_type + "', found '" + actual_type + "'!");
     }   
 }
 
@@ -72,13 +109,13 @@ void rule_parser::validate_rules(const std::vector<RuleDefinition>& to_validate,
 }
 
 void rule_parser::validate_rule(const RuleDefinition& to_validate, const type_parser::TypeInfoTable& type_infos) {
-    for(const Parameter& par : to_validate.parameters) {
-        if(!par.is_token && !type_infos.contains(par.identifier)) 
-            throw std::runtime_error("The type '" + par.identifier + "' doesn't exist!");
+    for(const Argument& arg : to_validate.arguments) {
+        if(!arg.is_token && !type_infos.contains(arg.identifier)) 
+            throw std::runtime_error("The type '" + arg.identifier + "' doesn't exist!");
     }
 
-    for(const std::optional<size_t>& index : to_validate.result.arguments) {
-        if(index.has_value() && index.value() >= to_validate.parameters.size()) 
+    for(const std::optional<size_t>& index : to_validate.result.argument_ids) {
+        if(index.has_value() && index.value() >= to_validate.arguments.size()) 
             throw std::runtime_error("Index '" + std::to_string(index.value()) + "' out of bounds!");
     }
 
