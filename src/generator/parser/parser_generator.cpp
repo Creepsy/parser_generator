@@ -120,7 +120,7 @@ std::set<rule_parser::RuleDefinition> parser_generator::get_sub_rules(const std:
         for(const rule_parser::RuleDefinition& rule : rules) {
             if(!rule.is_entry && !already_checked.contains(rule)) {
                 if(type_parser::is_convertible(rule.result.type.identifier, to_check.curr().value().identifier, type_infos)) {
-                    if(rule.result.type.is_vector == to_check.curr().value().is_vector) {
+                    if(rule.result.type.is_vector == to_check.curr().value().is_vector && rule.result.type.scope == to_check.curr().value().scope) {
                         if(!rule.result.type.is_vector || rule.result.type.identifier == to_check.curr().value().identifier) {
                             sub_rules.insert(rule);
                             sub_rules.merge(get_sub_rules(rules, states::RuleState(rule), type_infos, already_checked));

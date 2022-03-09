@@ -12,6 +12,7 @@ namespace rule_parser {
         bool is_vector;
 
         std::string identifier;
+        std::string scope;
     };
 
     struct RuleResult {
