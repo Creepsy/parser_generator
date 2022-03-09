@@ -18,6 +18,9 @@ void validate_rule_result(const RuleDefinition& to_validate, const type_parser::
     if(to_validate.result.type.identifier.empty())
         throw std::runtime_error("The rule is missing a return type!");
 
+    if(to_validate.is_entry && !to_validate.result.type.scope.empty())
+        throw std::runtime_error("Entry rules aren't allowed to have a scope!");
+
     if(!type_infos.contains(to_validate.result.type.identifier) && !to_validate.result.type.is_token)
         throw std::runtime_error("The type '" + to_validate.result.type.identifier + "' doesn't exist!");
 

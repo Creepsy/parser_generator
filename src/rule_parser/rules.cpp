@@ -8,7 +8,12 @@ using namespace rule_parser;
 
 std::ostream& rule_parser::operator<<(std::ostream& stream, const RuleResult& to_write) {
     if(to_write.result_type == RuleResult::PASS_ARG) 
-        return stream << "$" << to_write.argument_ids.begin()->value_or(-1) << " -> " << to_write.type;
+        stream << "$" << to_write.argument_ids.begin()->value_or(-1);
+        
+        if(!to_write.type.scope.empty())
+            stream << "#" << to_write.type.scope;
+
+        return stream << " -> " << to_write.type;
 
     stream << to_write.type << "(";
 
