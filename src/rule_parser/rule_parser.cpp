@@ -59,7 +59,13 @@ std::vector<Argument> rule_parser::RuleParser::parse_arguments() {
 
 RuleResult rule_parser::RuleParser::parse_rule_result() {
     if(this->accept(rule_lexer::token::INDEX)) {
-        return RuleResult{RuleResult::PASS_ARG, Argument{}, std::vector<std::optional<size_t>>{std::stoull(this->consume().identifier.substr(1))}};
+        size_t index = std::stoull(this->consume().identifier.substr(1));
+
+        std::string scope;
+        if(this->accept(rule_lexer::token::SCOPE))
+            scope = this->consume().identifier.substr(1);
+
+        return RuleResult{RuleResult::PASS_ARG, Argument{false, false, "", scope}, std::vector<std::optional<size_t>>{index}};
     }
 
     std::string type = this->consume(rule_lexer::token::IDENTIFIER).identifier;
@@ -104,11 +110,15 @@ RuleDefinition&& rule_parser::RuleParser::decorate_rule(RuleDefinition&& to_deco
         size_t to_pass = to_decorate.result.argument_ids.begin()->value_or(-1);
 
         if(to_pass < to_decorate.arguments.size()) {
+            std::string scope = to_decorate.result.type.scope;
+            
             if(to_decorate.arguments[to_pass].is_token) {
                 to_decorate.result.type = Argument{true, false, "Token"};
             } else {
                 to_decorate.result.type = to_decorate.arguments[to_pass];
             }
+
+            to_decorate.result.type.scope = scope;
         }
     }
 
