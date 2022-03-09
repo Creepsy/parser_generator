@@ -29,6 +29,9 @@ std::optional<RuleState> states::RuleState::advance(const rule_parser::Argument&
     if(to_expect.is_vector != this->curr().value().is_vector)
         return std::nullopt;
 
+    if(to_expect.is_vector && to_expect.identifier != this->curr().value().identifier)
+        return std::nullopt;
+
     return (type_parser::is_convertible(from, to, type_infos)) ? std::optional<RuleState>(RuleState(this->rule, this->position + 1, this->possible_lookaheads)) : std::nullopt;
 }
 

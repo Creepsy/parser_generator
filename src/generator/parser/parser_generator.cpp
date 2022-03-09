@@ -59,7 +59,7 @@ void generate_actions(states::State& to_process, std::map<states::State, size_t>
 }
 
 std::set<rule_parser::Argument> unwrap_type(const rule_parser::Argument& to_unwrap, const type_parser::TypeInfoTable& type_infos) {
-    if(to_unwrap.is_token || !type_infos.at(to_unwrap.identifier).is_base)
+    if(to_unwrap.is_token || to_unwrap.is_vector || !type_infos.at(to_unwrap.identifier).is_base)
         return std::set<rule_parser::Argument>{to_unwrap};
 
     std::set<rule_parser::Argument> unwrapped;
@@ -67,7 +67,7 @@ std::set<rule_parser::Argument> unwrap_type(const rule_parser::Argument& to_unwr
 
     std::transform(possible_types.begin(), possible_types.end(), std::inserter(unwrapped, unwrapped.end()), 
         [&](const std::string& type) -> rule_parser::Argument {
-            return rule_parser::Argument{false, to_unwrap.is_vector, type};    
+            return rule_parser::Argument{false, false, type};    
         }
     );
 
@@ -121,8 +121,10 @@ std::set<rule_parser::RuleDefinition> parser_generator::get_sub_rules(const std:
             if(!rule.is_entry && !already_checked.contains(rule)) {
                 if(type_parser::is_convertible(rule.result.type.identifier, to_check.curr().value().identifier, type_infos)) {
                     if(rule.result.type.is_vector == to_check.curr().value().is_vector) {
-                        sub_rules.insert(rule);
-                        sub_rules.merge(get_sub_rules(rules, states::RuleState(rule), type_infos, already_checked));
+                        if(!rule.result.type.is_vector || rule.result.type.identifier == to_check.curr().value().identifier) {
+                            sub_rules.insert(rule);
+                            sub_rules.merge(get_sub_rules(rules, states::RuleState(rule), type_infos, already_checked));
+                        }
                     }
                 }
             }
