@@ -2,12 +2,12 @@
 
 #include <set>
 
-using namespace generator;
+using namespace code_generator;
 
 //helper functions
-std::string parameter_to_code(const type_parser::Parameter& to_convert, const LexerInfo& lexer_info);
+std::string parameter_to_code(const type_parser::Parameter& to_convert, const LexerFileInfo& lexer_info);
 
-std::string parameter_to_code(const type_parser::Parameter& to_convert, const LexerInfo& lexer_info) {
+std::string parameter_to_code(const type_parser::Parameter& to_convert, const LexerFileInfo& lexer_info) {
     std::string type_code;
 
     if(to_convert.is_vector)
@@ -29,12 +29,12 @@ std::string parameter_to_code(const type_parser::Parameter& to_convert, const Le
 
 
 
-void generator::generate_types_code(std::ostream& target, const std::string& namespace_name, const LexerInfo& lexer_info, const std::vector<type_parser::TypeDefinition>& types) {
+void code_generator::generate_types_code(std::ostream& target, const ParserFileInfo& parser_info, const LexerFileInfo& lexer_info, const std::vector<type_parser::TypeDefinition>& types) {
     target << "#pragma once\n\n"
            << "#include <vector>\n"
            << "#include <memory>\n\n"
            << "#include \"" << lexer_info.path << lexer_info.name << ".h\"\n\n"
-           << "namespace " << namespace_name << " {\n";
+           << "namespace " << parser_info.namespace_name << " {\n";
 
     std::set<std::string> generated_types;
 
@@ -77,7 +77,7 @@ void generator::generate_types_code(std::ostream& target, const std::string& nam
     target << "}\n";
 }
 
-void generator::generate_type_code(std::ostream& target, const type_parser::TypeDefinition& type, const LexerInfo& lexer_info, const size_t intendation_level) {
+void code_generator::generate_type_code(std::ostream& target, const type_parser::TypeDefinition& type, const LexerFileInfo& lexer_info, const size_t intendation_level) {
     const std::string intendation = std::string(intendation_level, '\t');
 
     target << intendation << "struct " << type.identifier;
@@ -101,7 +101,7 @@ void generator::generate_type_code(std::ostream& target, const type_parser::Type
     target << intendation << "};\n\n";
 }
 
-void generator::generate_base_type_code(std::ostream& target, const std::string& base_type, const size_t intendation_level) {
+void code_generator::generate_base_type_code(std::ostream& target, const std::string& base_type, const size_t intendation_level) {
     const std::string intendation = std::string(intendation_level, '\t');
 
     target << intendation << "struct " << base_type << " {\n"
