@@ -16,7 +16,7 @@ std::string parameter_to_code(const type_parser::Parameter& to_convert, const Le
     if(to_convert.type == "Token") {
         type_code += lexer_info.name + "::token";
     } else {
-        type_code += to_convert.type;
+        type_code += "std::shared_ptr<" + to_convert.type + ">";
     }
 
     if(to_convert.is_vector)
@@ -31,7 +31,8 @@ std::string parameter_to_code(const type_parser::Parameter& to_convert, const Le
 
 void generator::generate_types_code(std::ostream& target, const std::string& namespace_name, const LexerInfo& lexer_info, const std::vector<type_parser::TypeDefinition>& types) {
     target << "#pragma once\n\n"
-           << "#include <vector>\n\n"
+           << "#include <vector>\n"
+           << "#include <memory>\n\n"
            << "#include \"" << lexer_info.path << lexer_info.name << ".h\"\n\n"
            << "namespace " << namespace_name << " {\n";
 
