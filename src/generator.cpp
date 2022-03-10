@@ -11,6 +11,8 @@
 
 #include "generator/parser/states.h"
 #include "generator/parser/parser_generator.h"
+#
+#include "generator/code/type_generation.h"
 
 int main() {
     std::ifstream type_input{"../example_parser.types"};
@@ -27,7 +29,6 @@ int main() {
 
     while(!type_pars.end()) {
         types.push_back(type_pars.parse_next_type());
-        std::cout << types.back() << std::endl;
     }
 
     type_input.close();
@@ -48,7 +49,6 @@ int main() {
 
     while(!rule_pars.end()) {
         rules.push_back(rule_pars.parse_next_rule());
-        std::cout << rules.back() << std::endl;
     }
 
     rule_input.close();
@@ -68,6 +68,10 @@ int main() {
     }
 
     std::cout << "\nStart-State: " << parser_info.start_state << std::endl;
+
+
+
+    generator::generate_types_code(std::cout, "parser", generator::LexerInfo{"lexer/", "simple_lexer"}, types); 
 
     return 0;
 }
