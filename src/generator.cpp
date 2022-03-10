@@ -13,6 +13,7 @@
 #include "generator/parser/parser_generator.h"
 #
 #include "generator/code/type_generation.h"
+#include "generator/code/parser_generation.h"
 
 int main() {
     std::ifstream type_input{"../example_parser.types"};
@@ -69,9 +70,13 @@ int main() {
 
     std::cout << "\nStart-State: " << parser_info.start_state << std::endl;
 
+    code_generator::LexerFileInfo lex_info{"lexer/", "simple_lexer"};
+    code_generator::ParserFileInfo pars_info{"types", "parser", "simple_parser"};
 
 
-    generator::generate_types_code(std::cout, "parser", generator::LexerInfo{"lexer/", "simple_lexer"}, types); 
+    code_generator::generate_types_code(std::cout, pars_info, lex_info, types); 
+    std::cout << std::endl;
+    code_generator::generate_parser_header_code(std::cout, pars_info, lex_info, parser_info);
 
     return 0;
 }
