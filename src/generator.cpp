@@ -70,15 +70,15 @@ int main() {
 
     std::cout << "\nStart-State: " << states_info.start_state << std::endl;
 
-    code_generator::LexerFileInfo lexer_info{"lexer/", "simple_lexer"};
-    code_generator::ParserFileInfo parser_info{"types", "parser", "simple_parser"};
+    code_generator::LexerFileInfo lexer_info{"", "lexer"};
+    code_generator::ParserFileInfo parser_info{"types", "parser", "Parser"};
 
+    code_generator::RuleIDMap rule_mappings = code_generator::generate_rule_ids(rules);
 
     code_generator::generate_types_code(std::cout, parser_info, lexer_info, types); 
     std::cout << std::endl;
-    code_generator::generate_parser_header_code(std::cout, parser_info, lexer_info, states_info, rules.size());
+    code_generator::generate_parser_header_code(std::cout, parser_info, lexer_info, states_info, rule_mappings);
     std::cout << std::endl;
-    code_generator::RuleIDMap rule_mappings = code_generator::generate_rule_ids(rules);
     code_generator::generate_parser_source_code(std::cout, parser_info, lexer_info, states_info, rule_mappings);
 
     return 0;

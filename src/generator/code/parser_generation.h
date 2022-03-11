@@ -14,7 +14,7 @@ namespace code_generator {
 
     RuleIDMap generate_rule_ids(const std::vector<rule_parser::RuleDefinition>& rules);
     void generate_parser_header_code(std::ostream& target, const ParserFileInfo& parser_info,
-            const LexerFileInfo& lexer_info, const parser_generator::StatesInfo& states_info, const size_t rule_count);
+            const LexerFileInfo& lexer_info, const parser_generator::StatesInfo& states_info, const RuleIDMap& rule_mappings);
     void generate_parser_source_code(std::ostream& target, const ParserFileInfo& parser_info,
             const LexerFileInfo& lexer_info, const parser_generator::StatesInfo& states_info, const RuleIDMap& rule_mappings);
 }

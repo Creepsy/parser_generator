@@ -6,5 +6,3 @@ numeric <ADD> int#test : addition($0, $1, $2);
 numeric : numeric[]($0);
 numeric[] <COMMA> numeric : numeric[]($0, $2);
 numeric[] : list($0);
-<PH> addition : addition[]($1);
-addition[] : list($0);
