@@ -134,10 +134,10 @@ std::set<rule_parser::RuleDefinition> parser_generator::get_sub_rules(const std:
     return sub_rules;
 }
 
-ParserInfo parser_generator::generate_parser_states(const std::vector<rule_parser::RuleDefinition>& rules,
+StatesInfo parser_generator::generate_parser_states(const std::vector<rule_parser::RuleDefinition>& rules,
         const type_parser::TypeInfoTable& type_infos, const states::StartTokensTable& start_table) {
     std::map<states::State, size_t> parser_states;
     size_t start_state = process_state(create_start_state(rules), parser_states, rules, type_infos, start_table);
 
-    return ParserInfo{parser_states, start_state};
+    return StatesInfo{parser_states, start_state};
 }

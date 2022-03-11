@@ -62,21 +62,24 @@ int main() {
     rule_parser::validate_rules(rules, type_infos);
     states::StartTokensTable start_table = states::construct_start_token_table(rules, type_infos);
 
-    parser_generator::ParserInfo parser_info = parser_generator::generate_parser_states(rules, type_infos, start_table);
+    parser_generator::StatesInfo states_info = parser_generator::generate_parser_states(rules, type_infos, start_table);
 
-    for(const std::pair<states::State, size_t>& state : parser_info.parser_states) {
+    for(const std::pair<states::State, size_t>& state : states_info.parser_states) {
         std::cout << state.second << ". " << state.first;
     }
 
-    std::cout << "\nStart-State: " << parser_info.start_state << std::endl;
+    std::cout << "\nStart-State: " << states_info.start_state << std::endl;
 
-    code_generator::LexerFileInfo lex_info{"lexer/", "simple_lexer"};
-    code_generator::ParserFileInfo pars_info{"types", "parser", "simple_parser"};
+    code_generator::LexerFileInfo lexer_info{"lexer/", "simple_lexer"};
+    code_generator::ParserFileInfo parser_info{"types", "parser", "simple_parser"};
 
 
-    code_generator::generate_types_code(std::cout, pars_info, lex_info, types); 
+    code_generator::generate_types_code(std::cout, parser_info, lexer_info, types); 
     std::cout << std::endl;
-    code_generator::generate_parser_header_code(std::cout, pars_info, lex_info, parser_info);
+    code_generator::generate_parser_header_code(std::cout, parser_info, lexer_info, states_info, rules.size());
+    std::cout << std::endl;
+    code_generator::RuleIDMap rule_mappings = code_generator::generate_rule_ids(rules);
+    code_generator::generate_parser_source_code(std::cout, parser_info, lexer_info, states_info, rule_mappings);
 
     return 0;
 }

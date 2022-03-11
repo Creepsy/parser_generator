@@ -12,7 +12,7 @@
 #include "states.h"
 
 namespace parser_generator {
-    struct ParserInfo {
+    struct StatesInfo {
         std::map<states::State, size_t> parser_states;
         size_t start_state;
     };
@@ -26,7 +26,7 @@ namespace parser_generator {
     std::set<rule_parser::RuleDefinition> get_sub_rules(const std::vector<rule_parser::RuleDefinition>& rules, const states::RuleState& to_check,
             const type_parser::TypeInfoTable& type_infos, std::set<rule_parser::RuleDefinition>& already_checked);
     
-    ParserInfo generate_parser_states(const std::vector<rule_parser::RuleDefinition>& rules, const type_parser::TypeInfoTable& type_infos,
+    StatesInfo generate_parser_states(const std::vector<rule_parser::RuleDefinition>& rules, const type_parser::TypeInfoTable& type_infos,
             const states::StartTokensTable& start_table);
 
 }
