@@ -154,7 +154,7 @@ std::set<rule_parser::Argument> states::get_lookahead_tokens(const State& state,
             if(!curr.value().is_token && type_parser::is_convertible(type.identifier, curr.value().identifier, type_infos) && type.is_vector == curr.value().is_vector) {
                 if(follow_up.has_value()) {
                     if(follow_up.value().is_token) {
-                        follow_up_tokens.insert(rule_parser::Argument{false, false, follow_up.value().identifier});
+                        follow_up_tokens.insert(rule_parser::Argument{true, false, follow_up.value().identifier});
                     } else {
                         follow_up_tokens.merge(get_start_tokens(follow_up.value(), start_table));
                     }

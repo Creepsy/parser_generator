@@ -77,10 +77,10 @@ void code_generator::generate_types_code(std::ostream& target, const ParserFileI
     target << "}\n";
 }
 
-void code_generator::generate_type_code(std::ostream& target, const type_parser::TypeDefinition& type, const LexerFileInfo& lexer_info, const size_t intendation_level) {
-    const std::string intendation = std::string(intendation_level, '\t');
+void code_generator::generate_type_code(std::ostream& target, const type_parser::TypeDefinition& type, const LexerFileInfo& lexer_info, const size_t indentation_level) {
+    const std::string indentation = std::string(indentation_level, '\t');
 
-    target << intendation << "struct " << type.identifier;
+    target << indentation << "struct " << type.identifier;
 
     if(!type.base_types.empty())
         target << " : ";
@@ -95,16 +95,16 @@ void code_generator::generate_type_code(std::ostream& target, const type_parser:
     target << " {\n";
 
     for(const type_parser::Parameter& par : type.parameters) {
-        target << intendation << "\t" << parameter_to_code(par, lexer_info) << "\n";
+        target << indentation << "\t" << parameter_to_code(par, lexer_info) << "\n";
     }
 
-    target << intendation << "};\n\n";
+    target << indentation << "};\n\n";
 }
 
-void code_generator::generate_base_type_code(std::ostream& target, const std::string& base_type, const size_t intendation_level) {
-    const std::string intendation = std::string(intendation_level, '\t');
+void code_generator::generate_base_type_code(std::ostream& target, const std::string& base_type, const size_t indentation_level) {
+    const std::string indentation = std::string(indentation_level, '\t');
 
-    target << intendation << "struct " << base_type << " {\n"
-           << intendation << "\tvirtual ~" << base_type << "(){}\n"
-           << intendation << "};\n\n";
+    target << indentation << "struct " << base_type << " {\n"
+           << indentation << "\tvirtual ~" << base_type << "(){}\n"
+           << indentation << "};\n\n";
 }
