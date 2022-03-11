@@ -67,7 +67,7 @@ void generate_goto_table(std::ostream& target, const parser_generator::StatesInf
                 for(const rule_parser::Argument& possible_type : action.possible_lookaheads)
                     target << indentation << "\t\t\tcase ElementType::" << type_to_enum_name(possible_type) << ":\n";
                 target << indentation << "\t\t\t\tparsed.state_id = " << std::get<size_t>(action.operand) << ";\n"
-                       << indentation << "\t\t\t\this->parse_stack.push(std::move(parsed));\n"
+                       << indentation << "\t\t\t\tthis->parse_stack.push(std::move(parsed));\n"
                        << indentation << "\t\t\t\tbreak;\n";
             }
         }
@@ -103,7 +103,6 @@ void code_generator::generate_parser_header_code(std::ostream& target, const Par
     target << "#pragma once\n\n"
            << "#include <any>\n"
            << "#include <cstddef>\n"
-           << "#include <utility>\n"
            << "#include <stack>\n\n"
            << "#include \"" << lexer_info.path << lexer_info.name << ".h\"\n"
            << "#include \"" << parser_info.types_path << ".h\"\n\n"
@@ -144,6 +143,7 @@ void code_generator::generate_parser_header_code(std::ostream& target, const Par
 void code_generator::generate_parser_source_code(std::ostream& target, const ParserFileInfo& parser_info,
             const LexerFileInfo& lexer_info, const parser_generator::StatesInfo& states_info, const RuleIDMap& rule_mappings) {
     target << "#include \"" << parser_info.parser_name << ".h\"\n\n"
+           << "#include <utility>\n"
            << "#include <stdexcept>\n\n"
            << "using namespace " << parser_info.namespace_name << ";\n\n";
 
