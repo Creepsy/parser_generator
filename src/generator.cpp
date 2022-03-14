@@ -2,6 +2,7 @@
 #include <fstream>
 #include <algorithm>
 #include <iterator>
+#include <string>
 
 #include "type_parser/type_parser.h"
 #include "type_parser/type_validator.h"
@@ -15,11 +16,22 @@
 #include "generator/code/type_generation.h"
 #include "generator/code/parser_generation.h"
 
-int main() {
-    std::ifstream type_input{"../example_parser.types"};
+int main(int argc, char* argv[]) {
+    if(argc != 9) {
+        std::cerr << "Usage: " << argv[0] << " <lexer_dir> <lexer_name> <output_dir> <types_name> <namespace_name> <parser_name> <types_input> <rules_input>" << std::endl;
+        return -1;
+    }
+
+    const code_generator::LexerFileInfo lexer_info{argv[1], argv[2]};
+    const code_generator::ParserFileInfo parser_info{argv[3], argv[4], argv[5], argv[6]};
+
+    const std::string types_input_path = argv[7];
+    const std::string rules_input_path = argv[8];
+
+    std::ifstream type_input{types_input_path};
 
     if(!type_input.is_open()) {
-        std::cerr << "Unable to open input file!" << std::endl;
+        std::cerr << "Unable to open types file!" << std::endl;
         return -1;
     }
 
@@ -36,10 +48,10 @@ int main() {
 
 
 
-    std::ifstream rule_input{"../example_parser.rules"};
+    std::ifstream rule_input{rules_input_path};
 
     if(!rule_input.is_open()) {
-        std::cerr << "Unable to open input file!" << std::endl;
+        std::cerr << "Unable to open rules file!" << std::endl;
         return -1;
     }
 
@@ -60,33 +72,32 @@ int main() {
     type_parser::TypeInfoTable type_infos = type_parser::construct_type_info_table(types);
 
     rule_parser::validate_rules(rules, type_infos);
+
     states::StartTokensTable start_table = states::construct_start_token_table(rules, type_infos);
-
     parser_generator::StatesInfo states_info = parser_generator::generate_parser_states(rules, type_infos, start_table);
-
-    for(const std::pair<states::State, size_t>& state : states_info.parser_states) {
-        std::cout << state.second << ". " << state.first;
-    }
-
-    std::cout << "\nStart-State: " << states_info.start_state << std::endl;
-
-    code_generator::LexerFileInfo lexer_info{"", "lexer"};
-    code_generator::ParserFileInfo parser_info{"types", "parser", "parser", "Parser"};
-
     code_generator::RuleIDMap rule_mappings = code_generator::generate_rule_ids(rules);
 
-    //std::ofstream types_out{"../test/types.h"};
-    std::ofstream header_out("../test/parser.h");
-    std::ofstream source_out{"../test/parser.cpp"};
+    std::ofstream types_out{parser_info.output_dir + parser_info.types_name + ".h"};
+    std::ofstream header_out(parser_info.output_dir + parser_info.parser_name + ".h");
+    std::ofstream source_out{parser_info.output_dir + parser_info.parser_name + ".cpp"};
 
-    //code_generator::generate_types_code(types_out, parser_info, lexer_info, types); 
-    //types_out.close();
+
+    code_generator::generate_types_code(types_out, parser_info, lexer_info, types); 
+    types_out.close();
+
+    std::cout << "Types header successfully created!" << std::endl;
 
     code_generator::generate_parser_header_code(header_out, parser_info, lexer_info, states_info, rule_mappings);
     header_out.close();
 
+    std::cout << "Parser header successfully created!" << std::endl;
+
     code_generator::generate_parser_source_code(source_out, parser_info, lexer_info, states_info, rule_mappings, type_infos);
     source_out.close();
+
+    std::cout << "Parser source successfully created!" << std::endl;
+
+    std::cout << "Finished!" << std::endl;
 
     return 0;
 }

@@ -1,3 +1,2 @@
-List(Value): member:Value[];
-Integer(Value, Numeric): num:Token;
-Addition(Value, Numeric): first:Numeric, op:Token, second:Numeric;
+MathExpr(Numeric): first:Numeric, op:Token, second:Numeric;
+Integer(Numeric): value:Token;

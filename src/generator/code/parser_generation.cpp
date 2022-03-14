@@ -15,12 +15,18 @@ std::set<std::string> get_used_type_enum_names(const std::vector<rule_parser::Ru
 void generate_reduce_declaration(std::ostream& target, const std::pair<rule_parser::RuleDefinition, size_t>& rule_mapping, const size_t indentation_level = 1);
 void generate_element_type_enum(std::ostream& target, const std::vector<rule_parser::RuleDefinition>& rules, const size_t indentation_level = 1);
 void generate_goto_table(std::ostream& target, const parser_generator::StatesInfo& states_info, const size_t indentation_level = 1);
-void generate_parser_states(std::ostream& target, const LexerFileInfo& lexer_info, const parser_generator::StatesInfo& states_info, const RuleIDMap& rule_mappings, const size_t indentation_level = 1);
-void convert_arg(std::ostream& target, const std::string& source_identifier, const std::string& target_identifier, const rule_parser::Argument& source_type, const rule_parser::Argument& target_type, const LexerFileInfo& lexer_info, const size_t indentation_level = 1);
-void generate_rule_reduction(std::ostream& target, const std::pair<rule_parser::RuleDefinition, size_t>& rule_mapping, const ParserFileInfo& parser_info, const LexerFileInfo& lexer_info, const type_parser::TypeInfoTable& type_infos);
-void generate_rule_result(std::ostream& target, const rule_parser::RuleDefinition& rule, const LexerFileInfo& lexer_info, const type_parser::TypeInfoTable& type_infos, const size_t indentation_level = 1);
-void generate_create_new_result(std::ostream& target, const rule_parser::RuleDefinition& rule, const LexerFileInfo& lexer_info, const type_parser::TypeInfoTable& type_infos, const size_t indentation_level = 1);
-void generate_create_vector_result(std::ostream& target, const rule_parser::RuleDefinition& rule, const LexerFileInfo& lexer_info, const type_parser::TypeInfoTable& type_infos, const size_t indentation_level = 1);
+void generate_parser_states(std::ostream& target, const LexerFileInfo& lexer_info, const parser_generator::StatesInfo& states_info,
+        const RuleIDMap& rule_mappings, const size_t indentation_level = 1);
+void convert_arg(std::ostream& target, const std::string& source_identifier, const std::string& target_identifier, const rule_parser::Argument& source_type,
+        const rule_parser::Argument& target_type, const LexerFileInfo& lexer_info, const size_t indentation_level = 1);
+void generate_rule_reduction(std::ostream& target, const std::pair<rule_parser::RuleDefinition, size_t>& rule_mapping, const ParserFileInfo& parser_info,
+        const LexerFileInfo& lexer_info, const type_parser::TypeInfoTable& type_infos);
+void generate_rule_result(std::ostream& target, const rule_parser::RuleDefinition& rule, const LexerFileInfo& lexer_info,
+        const type_parser::TypeInfoTable& type_infos, const size_t indentation_level = 1);
+void generate_create_new_result(std::ostream& target, const rule_parser::RuleDefinition& rule, const LexerFileInfo& lexer_info,
+        const type_parser::TypeInfoTable& type_infos, const size_t indentation_level = 1);
+void generate_create_vector_result(std::ostream& target, const rule_parser::RuleDefinition& rule, const LexerFileInfo& lexer_info,
+        const type_parser::TypeInfoTable& type_infos, const size_t indentation_level = 1);
 
 
 std::string type_to_enum_name(const rule_parser::Argument& to_convert) {
@@ -109,7 +115,8 @@ void generate_goto_table(std::ostream& target, const parser_generator::StatesInf
            << indentation << "}\n";
 }
 
-void generate_parser_states(std::ostream& target, const LexerFileInfo& lexer_info, const parser_generator::StatesInfo& states_info, const RuleIDMap& rule_mappings, const size_t indentation_level) {
+void generate_parser_states(std::ostream& target, const LexerFileInfo& lexer_info, const parser_generator::StatesInfo& states_info, 
+        const RuleIDMap& rule_mappings, const size_t indentation_level) {
     const std::string indentation = std::string(indentation_level, '\t');
 
     target << indentation << "while(true) {\n"
@@ -164,14 +171,12 @@ void generate_parser_states(std::ostream& target, const LexerFileInfo& lexer_inf
            << indentation << "}\n";
 }
 
-void convert_arg(std::ostream& target, const std::string& source_identifier, const std::string& target_identifier, const rule_parser::Argument& source_type, const rule_parser::Argument& target_type, const LexerFileInfo& lexer_info, const size_t indentation_level) {
+void convert_arg(std::ostream& target, const std::string& source_identifier, const std::string& target_identifier, const rule_parser::Argument& source_type,
+        const rule_parser::Argument& target_type, const LexerFileInfo& lexer_info, const size_t indentation_level) {
     const std::string indentation = std::string(indentation_level, '\t');
    
     std::string target_type_str = type_to_cpp_type(target_type, lexer_info);
-
-    // const std::string arg_str = "arg_" + std::to_string(arg);
-    // const std::string conv_str = "conv_" + std::to_string(arg);
-
+    
     if(source_type.is_vector) {
         target << indentation << target_type_str << " " << target_identifier << ";\n";
         target << indentation << "std::transform(" << source_identifier << ".begin(), " << source_identifier << ".end(), std::back_inserter(" << target_identifier << "), \n"
@@ -184,7 +189,8 @@ void convert_arg(std::ostream& target, const std::string& source_identifier, con
     }
 }
 
-void generate_rule_reduction(std::ostream& target, const std::pair<rule_parser::RuleDefinition, size_t>& rule_mapping, const ParserFileInfo& parser_info, const LexerFileInfo& lexer_info, const type_parser::TypeInfoTable& type_infos) {
+void generate_rule_reduction(std::ostream& target, const std::pair<rule_parser::RuleDefinition, size_t>& rule_mapping, const ParserFileInfo& parser_info,
+        const LexerFileInfo& lexer_info, const type_parser::TypeInfoTable& type_infos) {
     target << ((rule_mapping.first.is_entry) ? "ParseStackElement " : "void ") << parser_info.parser_name << "::reduce_" << rule_mapping.second << "() {\n";
 
     for(ssize_t arg = rule_mapping.first.arguments.size() - 1; arg >= 0; arg--) {
@@ -200,7 +206,8 @@ void generate_rule_reduction(std::ostream& target, const std::pair<rule_parser::
     target << "}\n\n";
 }
 
-void generate_rule_result(std::ostream& target, const rule_parser::RuleDefinition& rule, const LexerFileInfo& lexer_info, const type_parser::TypeInfoTable& type_infos, const size_t indentation_level) {
+void generate_rule_result(std::ostream& target, const rule_parser::RuleDefinition& rule, const LexerFileInfo& lexer_info, 
+        const type_parser::TypeInfoTable& type_infos, const size_t indentation_level) {
     const std::string indentation = std::string(indentation_level, '\t');
 
     switch(rule.result.result_type) {
@@ -232,7 +239,8 @@ void generate_rule_result(std::ostream& target, const rule_parser::RuleDefinitio
     }
 }
 
-void generate_create_new_result(std::ostream& target, const rule_parser::RuleDefinition& rule, const LexerFileInfo& lexer_info, const type_parser::TypeInfoTable& type_infos, const size_t indentation_level) {
+void generate_create_new_result(std::ostream& target, const rule_parser::RuleDefinition& rule, const LexerFileInfo& lexer_info, 
+        const type_parser::TypeInfoTable& type_infos, const size_t indentation_level) {
     const std::string indentation = std::string(indentation_level, '\t');
 
     std::string type_str = rule.result.type.identifier;
@@ -277,7 +285,8 @@ void generate_create_new_result(std::ostream& target, const rule_parser::RuleDef
     }
 }
 
-void generate_create_vector_result(std::ostream& target, const rule_parser::RuleDefinition& rule, const LexerFileInfo& lexer_info, const type_parser::TypeInfoTable& type_infos, const size_t indentation_level) {
+void generate_create_vector_result(std::ostream& target, const rule_parser::RuleDefinition& rule, const LexerFileInfo& lexer_info, 
+        const type_parser::TypeInfoTable& type_infos, const size_t indentation_level) {
     const std::string indentation = std::string(indentation_level, '\t');
 
     const rule_parser::Argument vector_type{rule.result.type.is_token, rule.result.type.is_vector, "TypeBase"};
@@ -336,7 +345,7 @@ void code_generator::generate_parser_header_code(std::ostream& target, const Par
            << "#include <cstddef>\n"
            << "#include <stack>\n\n"
            << "#include \"" << lexer_info.path << lexer_info.name << ".h\"\n"
-           << "#include \"" << parser_info.types_path << ".h\"\n\n"
+           << "#include \"" << parser_info.types_name << ".h\"\n\n"
            << "namespace " << parser_info.namespace_name << " {\n";
     
     std::vector<rule_parser::RuleDefinition> rules;
@@ -380,7 +389,7 @@ void code_generator::generate_parser_header_code(std::ostream& target, const Par
 
 void code_generator::generate_parser_source_code(std::ostream& target, const ParserFileInfo& parser_info,
             const LexerFileInfo& lexer_info, const parser_generator::StatesInfo& states_info, const RuleIDMap& rule_mappings, const type_parser::TypeInfoTable& type_infos) {
-    target << "#include \"" << parser_info.parser_path << ".h\"\n\n"
+    target << "#include \"" << parser_info.parser_name << ".h\"\n\n"
            << "#include <utility>\n"
            << "#include <algorithm>\n"
            << "#include <vector>\n"

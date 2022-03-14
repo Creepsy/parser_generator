@@ -9,8 +9,8 @@ namespace code_generator {
     };
 
     struct ParserFileInfo {
-        std::string types_path;
-        std::string parser_path;
+        std::string output_dir;
+        std::string types_name;
         std::string namespace_name;
         std::string parser_name;
     };

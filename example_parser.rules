@@ -1,7 +1,10 @@
-* Numeric[] <END_OF_FILE> : $0;
-Numeric <ADD> Integer : Addition($0, $1, $2);
-<INT> : Integer($0);
+* Numeric <END_OF_FILE> : $0;
 
-Numeric : Numeric[]($0);
-Numeric[] <COMMA> Numeric : Numeric[]($0, $2);
-Numeric[] : List($0);
+Numeric <ADD> Numeric#point_calculation : MathExpr($0, $1, $2);
+Numeric <SUB> Numeric#point_calculation : MathExpr($0, $1, $2);
+Numeric#point_calculation : $0;
+
+Numeric#point_calculation <DIV> Integer : MathExpr($0, $1, $2)#point_calculation;
+Numeric#point_calculation <MUL> Integer : MathExpr($0, $1, $2)#point_calculation;
+
+<INT> : Integer($0)#point_calculation;
