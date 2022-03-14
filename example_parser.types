@@ -1,2 +1,3 @@
-MathExpr(Numeric): first:Numeric, op:Token, second:Numeric;
+DashExpr(Numeric): first:Numeric, op:Token, second:Numeric;
+PointExpr(Numeric): first:Numeric, op:Token, second:Numeric;
 Integer(Numeric): value:Token;

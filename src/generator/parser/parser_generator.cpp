@@ -67,7 +67,7 @@ std::set<rule_parser::Argument> unwrap_type(const rule_parser::Argument& to_unwr
 
     std::transform(possible_types.begin(), possible_types.end(), std::inserter(unwrapped, unwrapped.end()), 
         [&](const std::string& type) -> rule_parser::Argument {
-            return rule_parser::Argument{false, false, type};    
+            return rule_parser::Argument{false, false, type, to_unwrap.scope};    
         }
     );
 

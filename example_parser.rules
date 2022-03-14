@@ -1,10 +1,13 @@
 * Numeric <END_OF_FILE> : $0;
 
-Numeric <ADD> Numeric#point_calculation : MathExpr($0, $1, $2);
-Numeric <SUB> Numeric#point_calculation : MathExpr($0, $1, $2);
-Numeric#point_calculation : $0;
+Numeric <ADD> PointExpr : DashExpr($0, $1, $2);
+Numeric <SUB> PointExpr : DashExpr($0, $1, $2);
+Numeric <ADD> Integer : DashExpr($0, $1, $2);
+Numeric <SUB> Integer : DashExpr($0, $1, $2);
 
-Numeric#point_calculation <DIV> Integer : MathExpr($0, $1, $2)#point_calculation;
-Numeric#point_calculation <MUL> Integer : MathExpr($0, $1, $2)#point_calculation;
+PointExpr <DIV> Integer : PointExpr($0, $1, $2);
+PointExpr <MUL> Integer : PointExpr($0, $1, $2);
+Integer <DIV> Integer : PointExpr($0, $1, $2);
+Integer <MUL> Integer : PointExpr($0, $1, $2);
 
-<INT> : Integer($0)#point_calculation;
+<INT> : Integer($0);

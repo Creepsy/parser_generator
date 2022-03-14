@@ -81,7 +81,6 @@ int main(int argc, char* argv[]) {
     std::ofstream header_out(parser_info.output_dir + parser_info.parser_name + ".h");
     std::ofstream source_out{parser_info.output_dir + parser_info.parser_name + ".cpp"};
 
-
     code_generator::generate_types_code(types_out, parser_info, lexer_info, types); 
     types_out.close();
 
