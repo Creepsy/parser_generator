@@ -1,8 +1,7 @@
-* value <EOF> : $0;
-numeric <ADD> int#test : addition($0, $1, $2);
-<INT> : int($0);
-<NUM> : int($0)#test;
+* Numeric[] <END_OF_FILE> : $0;
+Numeric <ADD> Integer : Addition($0, $1, $2);
+<INT> : Integer($0);
 
-numeric : numeric[]($0);
-numeric[] <COMMA> numeric : numeric[]($0, $2);
-numeric[] : list($0);
+Numeric : Numeric[]($0);
+Numeric[] <COMMA> Numeric : Numeric[]($0, $2);
+Numeric[] : List($0);

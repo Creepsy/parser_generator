@@ -10,6 +10,7 @@ namespace code_generator {
 
     struct ParserFileInfo {
         std::string types_path;
+        std::string parser_path;
         std::string namespace_name;
         std::string parser_name;
     };

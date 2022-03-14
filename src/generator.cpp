@@ -71,15 +71,22 @@ int main() {
     std::cout << "\nStart-State: " << states_info.start_state << std::endl;
 
     code_generator::LexerFileInfo lexer_info{"", "lexer"};
-    code_generator::ParserFileInfo parser_info{"types", "parser", "Parser"};
+    code_generator::ParserFileInfo parser_info{"types", "parser", "parser", "Parser"};
 
     code_generator::RuleIDMap rule_mappings = code_generator::generate_rule_ids(rules);
 
-    code_generator::generate_types_code(std::cout, parser_info, lexer_info, types); 
-    std::cout << std::endl;
-    code_generator::generate_parser_header_code(std::cout, parser_info, lexer_info, states_info, rule_mappings);
-    std::cout << std::endl;
-    code_generator::generate_parser_source_code(std::cout, parser_info, lexer_info, states_info, rule_mappings);
+    //std::ofstream types_out{"../test/types.h"};
+    std::ofstream header_out("../test/parser.h");
+    std::ofstream source_out{"../test/parser.cpp"};
+
+    //code_generator::generate_types_code(types_out, parser_info, lexer_info, types); 
+    //types_out.close();
+
+    code_generator::generate_parser_header_code(header_out, parser_info, lexer_info, states_info, rule_mappings);
+    header_out.close();
+
+    code_generator::generate_parser_source_code(source_out, parser_info, lexer_info, states_info, rule_mappings, type_infos);
+    source_out.close();
 
     return 0;
 }

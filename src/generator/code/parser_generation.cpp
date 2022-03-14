@@ -4,21 +4,23 @@
 #include <vector>
 #include <iterator>
 #include <string>
+#include <iostream>
 
 using namespace code_generator;
 
 //helper functions
 std::string type_to_enum_name(const rule_parser::Argument& to_convert);
 std::string type_to_cpp_type(const rule_parser::Argument& to_convert, const LexerFileInfo& lexer_info);
-std::set<std::string> get_used_type_enum_names(const parser_generator::StatesInfo& states_info);
+std::set<std::string> get_used_type_enum_names(const std::vector<rule_parser::RuleDefinition>& rules);
 void generate_reduce_declaration(std::ostream& target, const std::pair<rule_parser::RuleDefinition, size_t>& rule_mapping, const size_t indentation_level = 1);
-void generate_element_type_enum(std::ostream& target, const parser_generator::StatesInfo& states_info, const size_t indentation_level = 1);
+void generate_element_type_enum(std::ostream& target, const std::vector<rule_parser::RuleDefinition>& rules, const size_t indentation_level = 1);
 void generate_goto_table(std::ostream& target, const parser_generator::StatesInfo& states_info, const size_t indentation_level = 1);
 void generate_parser_states(std::ostream& target, const LexerFileInfo& lexer_info, const parser_generator::StatesInfo& states_info, const RuleIDMap& rule_mappings, const size_t indentation_level = 1);
-void generate_rule_reduction(std::ostream& target, const std::pair<rule_parser::RuleDefinition, size_t>& rule_mapping, const ParserFileInfo& parser_info, const LexerFileInfo& lexer_info);
-void generate_rule_result(std::ostream& target, const std::pair<rule_parser::RuleDefinition, size_t>& rule_mapping, const LexerFileInfo& lexer_info, const size_t indentation_level = 1);
-void generate_create_new_result(std::ostream& target, const std::pair<rule_parser::RuleDefinition, size_t>& rule_mapping, const size_t indentation_level = 1);
-void generate_create_vector_result(std::ostream& target, const std::pair<rule_parser::RuleDefinition, size_t>& rule_mapping, const LexerFileInfo& lexer_info, const size_t indentation_level = 1);
+void convert_arg(std::ostream& target, const std::string& source_identifier, const std::string& target_identifier, const rule_parser::Argument& source_type, const rule_parser::Argument& target_type, const LexerFileInfo& lexer_info, const size_t indentation_level = 1);
+void generate_rule_reduction(std::ostream& target, const std::pair<rule_parser::RuleDefinition, size_t>& rule_mapping, const ParserFileInfo& parser_info, const LexerFileInfo& lexer_info, const type_parser::TypeInfoTable& type_infos);
+void generate_rule_result(std::ostream& target, const rule_parser::RuleDefinition& rule, const LexerFileInfo& lexer_info, const type_parser::TypeInfoTable& type_infos, const size_t indentation_level = 1);
+void generate_create_new_result(std::ostream& target, const rule_parser::RuleDefinition& rule, const LexerFileInfo& lexer_info, const type_parser::TypeInfoTable& type_infos, const size_t indentation_level = 1);
+void generate_create_vector_result(std::ostream& target, const rule_parser::RuleDefinition& rule, const LexerFileInfo& lexer_info, const type_parser::TypeInfoTable& type_infos, const size_t indentation_level = 1);
 
 
 std::string type_to_enum_name(const rule_parser::Argument& to_convert) {
@@ -42,12 +44,12 @@ std::string type_to_cpp_type(const rule_parser::Argument& to_convert, const Lexe
     return "std::shared_ptr<" + to_convert.identifier + ">";
 }
 
-std::set<std::string> get_used_type_enum_names(const parser_generator::StatesInfo& states_info) {
+std::set<std::string> get_used_type_enum_names(const std::vector<rule_parser::RuleDefinition>& rules) {
     std::set<std::string> used_types;
-    for(const std::pair<states::State, size_t>& state : states_info.parser_states) {
-        for(const states::Action& action : state.first.actions) {
-            std::transform(action.possible_lookaheads.begin(), action.possible_lookaheads.end(), std::inserter(used_types, used_types.end()), type_to_enum_name);
-        }
+
+    for(const rule_parser::RuleDefinition& rule : rules) {
+        used_types.insert(type_to_enum_name(rule.result.type));
+        std::transform(rule.arguments.begin(), rule.arguments.end(), std::inserter(used_types, used_types.end()), type_to_enum_name);
     }
 
     return used_types;
@@ -55,14 +57,14 @@ std::set<std::string> get_used_type_enum_names(const parser_generator::StatesInf
 
 void generate_reduce_declaration(std::ostream& target, const std::pair<rule_parser::RuleDefinition, size_t>& rule_mapping, const size_t indentation_level) {
     target << "\t\t\t";
-    target << ((rule_mapping.first.is_entry) ? "ElementType" : "void");
+    target << ((rule_mapping.first.is_entry) ? "ParseStackElement" : "void");
     target << " reduce_" << rule_mapping.second << "();\n";
 }
 
-void generate_element_type_enum(std::ostream& target, const parser_generator::StatesInfo& states_info, const size_t indentation_level) {
+void generate_element_type_enum(std::ostream& target, const std::vector<rule_parser::RuleDefinition>& rules, const size_t indentation_level) {
     const std::string indentation = std::string(indentation_level, '\t');
 
-    std::set<std::string> used_types = get_used_type_enum_names(states_info);
+    std::set<std::string> used_types = get_used_type_enum_names(rules);
 
     target << indentation << "enum ElementType {\n";
 
@@ -98,6 +100,7 @@ void generate_goto_table(std::ostream& target, const parser_generator::StatesInf
 
         target << indentation << "\t\t\tdefault:\n"
                << indentation << "\t\t\t\tthis->throw_parse_error();\n"
+               << indentation << "\t\t}\n"
                << indentation << "\t\tbreak;\n";
     }
 
@@ -150,7 +153,8 @@ void generate_parser_states(std::ostream& target, const LexerFileInfo& lexer_inf
                 << indentation << "\t\t\t\t\tthis->throw_parse_error();\n"
                 << indentation << "\t\t\t\t\tbreak;\n";
 
-        target << indentation << "\t\t\t}\n";
+        target << indentation << "\t\t\t}\n"
+               << indentation << "\t\t\tbreak;\n";
 
     }
     target << indentation << "\t\tdefault:\n"
@@ -160,84 +164,133 @@ void generate_parser_states(std::ostream& target, const LexerFileInfo& lexer_inf
            << indentation << "}\n";
 }
 
-void generate_rule_reduction(std::ostream& target, const std::pair<rule_parser::RuleDefinition, size_t>& rule_mapping, const ParserFileInfo& parser_info, const LexerFileInfo& lexer_info) {
-    target << ((rule_mapping.first.is_entry) ? "ElementType " : "void ") << parser_info.parser_name << "::reduce_" << rule_mapping.second << "() {\n";
+void convert_arg(std::ostream& target, const std::string& source_identifier, const std::string& target_identifier, const rule_parser::Argument& source_type, const rule_parser::Argument& target_type, const LexerFileInfo& lexer_info, const size_t indentation_level) {
+    const std::string indentation = std::string(indentation_level, '\t');
+   
+    std::string target_type_str = type_to_cpp_type(target_type, lexer_info);
+
+    // const std::string arg_str = "arg_" + std::to_string(arg);
+    // const std::string conv_str = "conv_" + std::to_string(arg);
+
+    if(source_type.is_vector) {
+        target << indentation << target_type_str << " " << target_identifier << ";\n";
+        target << indentation << "std::transform(" << source_identifier << ".begin(), " << source_identifier << ".end(), std::back_inserter(" << target_identifier << "), \n"
+                << indentation << "\t[](const std::shared_ptr<" << source_type.identifier << ">& ptr) -> std::shared_ptr<" << target_type.identifier << "> {\n"
+                << indentation << "\t\treturn std::dynamic_pointer_cast<" << target_type.identifier << ">(ptr);\n"
+                << indentation << "\t}\n"
+                << indentation << ");\n";
+    } else {
+        target << indentation << target_type_str << " " << target_identifier << " = std::dynamic_pointer_cast<" << target_type.identifier << ">(" << source_identifier << ");\n";
+    }
+}
+
+void generate_rule_reduction(std::ostream& target, const std::pair<rule_parser::RuleDefinition, size_t>& rule_mapping, const ParserFileInfo& parser_info, const LexerFileInfo& lexer_info, const type_parser::TypeInfoTable& type_infos) {
+    target << ((rule_mapping.first.is_entry) ? "ParseStackElement " : "void ") << parser_info.parser_name << "::reduce_" << rule_mapping.second << "() {\n";
 
     for(ssize_t arg = rule_mapping.first.arguments.size() - 1; arg >= 0; arg--) {
-        std::string type_str = type_to_cpp_type(rule_mapping.first.arguments[arg], lexer_info);
+        const rule_parser::Argument target_type{rule_mapping.first.arguments[arg].is_token, rule_mapping.first.arguments[arg].is_vector, "TypeBase"};
+        std::string type_str = type_to_cpp_type(target_type, lexer_info);
         target << "\t" << type_str << " arg_" << arg << " = std::any_cast<" << type_str << ">(this->parse_stack.top().element); this->parse_stack.pop();\n";
     }
 
     target << "\n";
 
-    generate_rule_result(target, rule_mapping, lexer_info);
+    generate_rule_result(target, rule_mapping.first, lexer_info, type_infos);
 
     target << "}\n\n";
 }
 
-void generate_rule_result(std::ostream& target, const std::pair<rule_parser::RuleDefinition, size_t>& rule_mapping, const LexerFileInfo& lexer_info, const size_t indentation_level) {
+void generate_rule_result(std::ostream& target, const rule_parser::RuleDefinition& rule, const LexerFileInfo& lexer_info, const type_parser::TypeInfoTable& type_infos, const size_t indentation_level) {
     const std::string indentation = std::string(indentation_level, '\t');
 
-    switch(rule_mapping.first.result.result_type) {
+    switch(rule.result.result_type) {
         case rule_parser::RuleResult::CREATE_NEW:
-            generate_create_new_result(target, rule_mapping, indentation_level);
+            generate_create_new_result(target, rule, lexer_info, type_infos, indentation_level);
             break;
         case rule_parser::RuleResult::PASS_ARG:
             {
-                size_t arg_id = rule_mapping.first.result.argument_ids.front().value();
+                size_t arg_id = rule.result.argument_ids.front().value();
             
-                if(rule_mapping.first.is_entry) {
-                    target << indentation << "return ParseStackElement{arg_" << arg_id << ", ElementType::" << type_to_enum_name(rule_mapping.first.result.type) << ", 0};\n";
+                if(rule.is_entry) {
+                    std::string arg_str = "arg_";
+
+                    if(!rule.result.type.is_token) {
+                        rule_parser::Argument source_type{false, rule.result.type.is_vector, "TypeBase"};
+                        convert_arg(target, "arg_" + std::to_string(arg_id), "conv_" + std::to_string(arg_id), source_type, rule.result.type, lexer_info, indentation_level);
+                        arg_str = "conv_";
+                    }
+                
+                    target << indentation << "return ParseStackElement{" << arg_str << arg_id << ", ElementType::" << type_to_enum_name(rule.result.type) << ", 0};\n";
                 } else {
-                    target << indentation << "this->goto_table(std::move(ParseStackElement{arg_" << arg_id << ", ElementType::" << type_to_enum_name(rule_mapping.first.result.type) << ", 0}));\n";
+                    target << indentation << "this->goto_table(std::move(ParseStackElement{arg_" << arg_id << ", ElementType::" << type_to_enum_name(rule.result.type) << ", 0}));\n";
                 }
             }
             break;
         case rule_parser::RuleResult::CREATE_VECTOR:
-            generate_create_vector_result(target, rule_mapping, lexer_info, indentation_level);
+            generate_create_vector_result(target, rule, lexer_info, type_infos, indentation_level);
             break;
     }
 }
 
-void generate_create_new_result(std::ostream& target, const std::pair<rule_parser::RuleDefinition, size_t>& rule_mapping, const size_t indentation_level) {
+void generate_create_new_result(std::ostream& target, const rule_parser::RuleDefinition& rule, const LexerFileInfo& lexer_info, const type_parser::TypeInfoTable& type_infos, const size_t indentation_level) {
     const std::string indentation = std::string(indentation_level, '\t');
 
-    std::string type_str = rule_mapping.first.result.type.identifier;
-    std::string type_enum = type_to_enum_name(rule_mapping.first.result.type);
+    std::string type_str = rule.result.type.identifier;
+    std::string type_enum = type_to_enum_name(rule.result.type);
 
-    target << indentation << "ParseStackElement result{std::make_shared<" << type_str << ">(";
+    for(size_t arg = 0; arg < rule.result.argument_ids.size(); arg++) {
+        if(rule.result.argument_ids[arg].has_value()) {
+            size_t arg_id = rule.result.argument_ids[arg].value();
+            if(!rule.arguments[arg_id].is_token) {
+                const rule_parser::Argument source_type{false, rule.arguments[arg_id].is_vector, "TypeBase"};
+                const std::string target_type = type_infos.at(rule.result.type.identifier).parameters[arg].type;
+                convert_arg(target, "arg_" + std::to_string(arg_id), "conv_" + std::to_string(arg_id), source_type, rule_parser::Argument{false, rule.arguments[arg_id].is_vector, target_type}, lexer_info, indentation_level);
+            }
+        }
+    }
 
-    for(size_t arg = 0; arg < rule_mapping.first.result.argument_ids.size(); arg++) {
+    target << indentation << "ParseStackElement result{";
+
+    if(!rule.is_entry)
+        target << "std::dynamic_pointer_cast<TypeBase>";
+
+    target << "(std::make_shared<" << type_str << ">(";
+
+    for(size_t arg = 0; arg < rule.result.argument_ids.size(); arg++) {
         if(arg != 0) target << ", ";
 
-        if(rule_mapping.first.result.argument_ids[arg].has_value()) {
-            target << "std::move(arg_" << rule_mapping.first.result.argument_ids[arg].value() << ")";
+        if(rule.result.argument_ids[arg].has_value()) {
+            size_t arg_id = rule.result.argument_ids[arg].value();
+            const std::string arg_str = (!rule.arguments[arg_id].is_token) ? "conv_" : "arg_";
+            target << "std::move(" << arg_str << rule.result.argument_ids[arg].value() << ")";
         } else {
             target << "{}";
         }
     }
 
-    target << "), ElementType::" << type_enum << ", 0};\n";
+    target << ")), ElementType::" << type_enum << ", 0};\n";
 
-    if(rule_mapping.first.is_entry) {
+    if(rule.is_entry) {
         target << indentation << "return result;\n";
     } else {
         target << indentation << "this->goto_table(std::move(result));\n";
     }
 }
 
-void generate_create_vector_result(std::ostream& target, const std::pair<rule_parser::RuleDefinition, size_t>& rule_mapping, const LexerFileInfo& lexer_info, const size_t indentation_level) {
+void generate_create_vector_result(std::ostream& target, const rule_parser::RuleDefinition& rule, const LexerFileInfo& lexer_info, const type_parser::TypeInfoTable& type_infos, const size_t indentation_level) {
     const std::string indentation = std::string(indentation_level, '\t');
 
-    target << indentation << type_to_cpp_type(rule_mapping.first.result.type, lexer_info) << " collected;\n\n";
+    const rule_parser::Argument vector_type{rule.result.type.is_token, rule.result.type.is_vector, "TypeBase"};
 
-    for(size_t arg = 0; arg < rule_mapping.first.result.argument_ids.size(); arg++) {
+    target << indentation << type_to_cpp_type(vector_type, lexer_info) << " collected;\n\n";
+
+    for(size_t arg = 0; arg < rule.result.argument_ids.size(); arg++) {
 
         target << indentation;
 
-        if(rule_mapping.first.result.argument_ids[arg].has_value()) {
-            size_t arg_id = rule_mapping.first.result.argument_ids[arg].value();
-            const rule_parser::Argument arg_type = rule_mapping.first.arguments[arg_id];
+        if(rule.result.argument_ids[arg].has_value()) {
+            size_t arg_id = rule.result.argument_ids[arg].value();
+            const rule_parser::Argument arg_type = rule.arguments[arg_id];
 
             if(arg_type.is_vector) {
                 target << "std::copy(arg_" << arg_id << ".begin(), arg_" << arg_id << ".end(), std::back_inserter(collected));\n";
@@ -250,10 +303,11 @@ void generate_create_vector_result(std::ostream& target, const std::pair<rule_pa
     }
     target << "\n";
 
-    std::string type_enum = type_to_enum_name(rule_mapping.first.result.type);
+    std::string type_enum = type_to_enum_name(rule.result.type);
 
-    if(rule_mapping.first.is_entry) {
-        target << indentation << "return ParseStackElement{std::move(collected), ElementType::" << type_enum << ", 0};\n";
+    if(rule.is_entry) {
+        convert_arg(target, "collected", "conv_collected", vector_type, rule.result.type, lexer_info, indentation_level);
+        target << indentation << "return ParseStackElement{std::move(conv_collected), ElementType::" << type_enum << ", 0};\n";
     } else {
         target << indentation << "this->goto_table(std::move(ParseStackElement{std::move(collected), ElementType::" << type_enum << ", 0}));\n";
     }   
@@ -284,8 +338,15 @@ void code_generator::generate_parser_header_code(std::ostream& target, const Par
            << "#include \"" << lexer_info.path << lexer_info.name << ".h\"\n"
            << "#include \"" << parser_info.types_path << ".h\"\n\n"
            << "namespace " << parser_info.namespace_name << " {\n";
+    
+    std::vector<rule_parser::RuleDefinition> rules;
+    std::transform(rule_mappings.begin(), rule_mappings.end(), std::back_inserter(rules), 
+        [](const std::pair<rule_parser::RuleDefinition, size_t>& entry) -> rule_parser::RuleDefinition {
+            return entry.first;
+        }
+    );
 
-    generate_element_type_enum(target, states_info);
+    generate_element_type_enum(target, rules);
 
     target << "\tstruct ParseStackElement {\n"
            << "\t\tstd::any element;\n"
@@ -318,8 +379,8 @@ void code_generator::generate_parser_header_code(std::ostream& target, const Par
 }
 
 void code_generator::generate_parser_source_code(std::ostream& target, const ParserFileInfo& parser_info,
-            const LexerFileInfo& lexer_info, const parser_generator::StatesInfo& states_info, const RuleIDMap& rule_mappings) {
-    target << "#include \"" << parser_info.parser_name << ".h\"\n\n"
+            const LexerFileInfo& lexer_info, const parser_generator::StatesInfo& states_info, const RuleIDMap& rule_mappings, const type_parser::TypeInfoTable& type_infos) {
+    target << "#include \"" << parser_info.parser_path << ".h\"\n\n"
            << "#include <utility>\n"
            << "#include <algorithm>\n"
            << "#include <vector>\n"
@@ -353,7 +414,7 @@ void code_generator::generate_parser_source_code(std::ostream& target, const Par
 
     target << "void " << parser_info.parser_name << "::throw_parse_error() {\n"
            << "\tconstexpr auto format_position = [](size_t line, size_t column) -> std::string { return \"[L:\" + std::to_string(line) + \", C:\" + std::to_string(column) + \"]\"; };\n"
-           << "\tthrow std::runtime_error(\"Error while parsing \" + this->curr.identifier + \" at \" + format_position(this->curr.pos) +  \"! \");\n"
+           << "\tthrow std::runtime_error(\"Error while parsing \" + this->curr.identifier + \" at \" + format_position(this->curr.pos.start_line, this->curr.pos.start_column) +  \"! \");\n"
            << "}\n\n";
 
     target << "size_t " << parser_info.parser_name << "::get_state() {\n"
@@ -361,5 +422,5 @@ void code_generator::generate_parser_source_code(std::ostream& target, const Par
            << "}\n\n";
 
     for(const std::pair<rule_parser::RuleDefinition, size_t>& rule_mapping : rule_mappings) 
-        generate_rule_reduction(target, rule_mapping, parser_info, lexer_info);
+        generate_rule_reduction(target, rule_mapping, parser_info, lexer_info, type_infos);
 }

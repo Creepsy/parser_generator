@@ -1,0 +1,5 @@
+$WSPACE \s+
+INT \d+
+ADD \+
+COMMA \,
+NUM num

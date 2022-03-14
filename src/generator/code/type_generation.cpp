@@ -5,9 +5,9 @@
 using namespace code_generator;
 
 //helper functions
-std::string parameter_to_code(const type_parser::Parameter& to_convert, const LexerFileInfo& lexer_info);
+std::string parameter_to_code(const type_parser::Parameter& to_convert, const LexerFileInfo& lexer_info, const bool is_reference = false);
 
-std::string parameter_to_code(const type_parser::Parameter& to_convert, const LexerFileInfo& lexer_info) {
+std::string parameter_to_code(const type_parser::Parameter& to_convert, const LexerFileInfo& lexer_info, const bool is_reference) {
     std::string type_code;
 
     if(to_convert.is_vector)
@@ -22,7 +22,10 @@ std::string parameter_to_code(const type_parser::Parameter& to_convert, const Le
     if(to_convert.is_vector)
         type_code += ">";
 
-    type_code += " " + to_convert.identifier + ";";
+    if(is_reference)
+        type_code += "&";
+
+    type_code += " " + to_convert.identifier + "";
 
     return type_code;
 }
@@ -38,39 +41,28 @@ void code_generator::generate_types_code(std::ostream& target, const ParserFileI
 
     std::set<std::string> generated_types;
 
-    //forward-declaration
+    generate_base_type_code(target, "TypeBase");
+
+    //base types
     for(const type_parser::TypeDefinition& type : types) {
         if(!generated_types.contains(type.identifier)) {
-            generated_types.insert(type.identifier);
-
-            target << "\tstruct " << type.identifier << ";\n";
-
             for(const std::string& base_type : type.base_types) {
                 if(!generated_types.contains(base_type)) {
                     generated_types.insert(base_type);
-
-                    target << "\tstruct " << base_type << ";\n";
+                    generate_base_type_code(target, base_type);
                 }
             }
         }
     }
 
-    generated_types.clear();
-    target << "\n";
-
+    //types
     for(const type_parser::TypeDefinition& type : types) {
-        if(!generated_types.contains(type.identifier)) {
-            generated_types.insert(type.identifier);
+        type_parser::TypeDefinition modified = type;
+        modified.base_types.insert("TypeBase");
 
-            generate_type_code(target, type, lexer_info);
-
-            for(const std::string& base_type : type.base_types) {
-                if(!generated_types.contains(base_type)) {
-                    generated_types.insert(base_type);
-
-                    generate_base_type_code(target, base_type);
-                }
-            }
+        if(!generated_types.contains(modified.identifier)) {
+            generated_types.insert(modified.identifier);
+            generate_type_code(target, modified, lexer_info);
         }
     }
 
@@ -95,8 +87,26 @@ void code_generator::generate_type_code(std::ostream& target, const type_parser:
     target << " {\n";
 
     for(const type_parser::Parameter& par : type.parameters) {
-        target << indentation << "\t" << parameter_to_code(par, lexer_info) << "\n";
+        target << indentation << "\t" << parameter_to_code(par, lexer_info) << ";\n";
     }
+
+    target << "\n"
+           << indentation << "\t" << type.identifier << "(";
+
+
+    for(size_t par = 0; par < type.parameters.size(); par++) {
+        if(par != 0) target << ", ";
+        target << "const " << parameter_to_code(type.parameters[par], lexer_info, true);
+    }
+
+    target << ") : ";
+
+    for(size_t par = 0; par < type.parameters.size(); par++) {
+        if(par != 0) target << ", ";
+        target << type.parameters[par].identifier << "(" << type.parameters[par].identifier << ")";
+    }
+
+    target << "{}\n";
 
     target << indentation << "};\n\n";
 }

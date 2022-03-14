@@ -6,6 +6,7 @@
 #include "../parser/parser_generator.h"
 
 #include "../../rule_parser/rules.h"
+#include "../../type_parser/types.h"
 
 #include "generation_utils.h"
 
@@ -16,5 +17,5 @@ namespace code_generator {
     void generate_parser_header_code(std::ostream& target, const ParserFileInfo& parser_info,
             const LexerFileInfo& lexer_info, const parser_generator::StatesInfo& states_info, const RuleIDMap& rule_mappings);
     void generate_parser_source_code(std::ostream& target, const ParserFileInfo& parser_info,
-            const LexerFileInfo& lexer_info, const parser_generator::StatesInfo& states_info, const RuleIDMap& rule_mappings);
+            const LexerFileInfo& lexer_info, const parser_generator::StatesInfo& states_info, const RuleIDMap& rule_mappings, const type_parser::TypeInfoTable& type_infos);
 }
